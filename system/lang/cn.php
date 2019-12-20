@@ -2,7 +2,7 @@
 /**
  * YiluPHP vision 1.0
  * User: Wu Jianwu
- * Date: 2017/11/21
+ * Date: 2019/11/21
  * Time: 21:41
  */
 return [
@@ -38,4 +38,5 @@ return [
     'xxx_parameter_rsa_encrypt_error' => '解密参数[{$field}]失败',
     'decryption_failed_no_private_key' => '解密失败，未配置RSA解密用的私钥',
     'unknown_validation_rule_for_parameter_xxx' => '参数[{$field}]存在未知的校验规则：',
+    'class_not_found' => '找不到类：',
 ];

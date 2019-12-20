@@ -13,7 +13,7 @@
  * 使用redis列表实现
  * YiluPHP vision 1.0
  * User: Jim.Wu
- * Date: 17/12/24
+ * Date: 19/12/24
  * Time: 18:45
  */
 if(!isset($_SERVER['REQUEST_URI'])){

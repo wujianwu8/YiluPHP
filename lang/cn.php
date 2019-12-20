@@ -18,7 +18,7 @@ return [
     'parameter_xxx_error' => '当参数[{$field}]错误时：',
     'parameter_xxx_is_correct' => '当参数[{$field}]正确时：',
     'current_environment' => '当前环境：',
-    'website_logo_img' => 'https://yiluphp.oss-cn-shenzhen.aliyuncs.com/yiluphp/logo-cn.png',
+    'website_logo_img' => '/img/logo-cn.png',
     'get_parameters' => '获取参数',
     'title_too_long' => '标题太长了',
     'no_data' => '没有数据',

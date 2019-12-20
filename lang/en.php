@@ -18,7 +18,7 @@ return [
     'parameter_xxx_error' => 'When parameter [{$field}] error: ',
     'parameter_xxx_is_correct' => 'When the parameter [{$field}] is correct: ',
     'current_environment' => 'Current ENV: ',
-    'website_logo_img' => 'https://yiluphp.oss-cn-shenzhen.aliyuncs.com/yiluphp/logo-en.png',
+    'website_logo_img' => '/img/logo-en.png',
     'get_parameters' => 'Get Parameters',
     'title_too_long' => 'The title is too long',
     'no_data' => 'No data',

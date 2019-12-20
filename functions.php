@@ -3,7 +3,7 @@
  * 函数库，用户可在此添加自己所需函数
  * YiluPHP vision 1.0
  * User: Jim.Wu
- * Date: 17/12/30
+ * Date: 19/12/30
  * Time: 09:43
  */
 

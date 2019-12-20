@@ -1,6 +1,6 @@
 <?php
 /**
- * @group 这是分组名称
+ * @group
  * @version
  * @name 欢迎页，Controller的示例
  * @desc 请在Controller中保持此格式的注释，后期会提供根据此注释自动生成接口文档的功能

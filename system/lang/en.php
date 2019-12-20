@@ -2,7 +2,7 @@
 /**
  * YiluPHP vision 1.0
  * User: Wu Jianwu
- * Date: 2017/11/21
+ * Date: 2019/11/21
  * Time: 19:41
  */
 return [
@@ -38,4 +38,5 @@ return [
     'xxx_parameter_rsa_encrypt_error' => 'Failed to decrypt parameter [{$field}]',
     'decryption_failed_no_private_key' => 'Decryption failed, private key for RSA decryption is not configured',
     'unknown_validation_rule_for_parameter_xxx' => 'Unknown validation rule for parameter [{$field}]: ',
+    'class_not_found' => 'Class not found: ',
 ];
