@@ -5,8 +5,8 @@
  * 此文件中创建的实例$app，连接数据库和redis都通过此实例
  * YiluPHP vision 1.0
  * User: Jim.Wu
- * Date: 17/12/30
- * Time: 09:22
+ * Date: 19/12/27
+ * Time: 19:21
  */
 
 !isset($project_root) && $project_root = substr(dirname(__FILE__), 0, -6);
@@ -500,6 +500,51 @@ class YiluPHP
     public $helper = [];
     protected $lang = [];
     protected $page_lang = [];
+    public $autoload_class = null;
+
+    public function __construct()
+    {
+        $this->autoload_class = function ($class_name){
+            $file = $GLOBALS['project_root'].'helper/'.$class_name.'.php';
+            if (file_exists($file)) {
+                //helper类文件的文件名、类名、app中的调用方法三者需要一致
+                require_once($file);
+                return $class_name;
+            }
+
+            //将驼峰式的名称用下划线分割
+            $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $class_name);
+            $path = explode('_', $path, 2);
+            $path = $path[0].'/'.$class_name;
+            $file = $GLOBALS['project_root'].$path.'.php';
+            if (file_exists($file)) {
+                //类文件的文件名、类名、app中的调用方法三者需要一致
+                require_once($file);
+                return $class_name;
+            }
+
+            //支持给类取别名
+            if(!empty($GLOBALS['config']['helper_alias']) && array_key_exists($class_name, $GLOBALS['config']['helper_alias']) ){
+                $real_class_name = $GLOBALS['config']['helper_alias'][$class_name];
+                $file = $GLOBALS['project_root'].'helper/'.$real_class_name.'.php';
+                if (file_exists($file)) {
+                    require_once($file);
+                    return $real_class_name;
+                }
+
+                //将驼峰式的名称用下划线分割
+                $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $real_class_name);
+                $path = explode('_', $path, 2);
+                $path = $path[0].'/'.$real_class_name;
+                $file = $GLOBALS['project_root'].$path.'.php';
+                if (file_exists($file)) {
+                    require_once($file);
+                    return $real_class_name;
+                }
+            }
+            return false;
+        };
+    }
 
     public function __destruct()
     {
@@ -719,63 +764,14 @@ class YiluPHP
         if (isset($this->helper[$name])) {
             return $this->helper[$name];
         }
-        $dir = in_array($name, ['response']) ? 'system/' : '';
-
-        $file = $GLOBALS['project_root'].$dir.'helper/'.$name.'.php';
-        if (file_exists($file)) {
-            //helper类文件的文件名、类名、app中的调用方法三者需要一致
-            require_once($file);
-            $this->helper[$name] = new $name;
+        $fun = $this->autoload_class;
+        $class_name = $fun($name);
+        unset($fun);
+        if ($class_name!==false){
+            $this->helper[$name] = new $class_name;
             return $this->helper[$name];
         }
-
-        //将驼峰式的名称用下划线分割
-        $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $name);
-        $path = explode('_', $path, 2);
-        if (count($path)>1){
-            $path = $path[0].'/'.$name;
-        }
-        else{
-            $path = $path[0].'/'.$name;
-        }
-        $file = $GLOBALS['project_root'].$dir.$path.'.php';
-        if (file_exists($file)) {
-            //helper类文件的文件名、类名、app中的调用方法三者需要一致
-            require_once($file);
-            $this->helper[$name] = new $name;
-            return $this->helper[$name];
-        }
-
-        //支持给helper取别名
-        if(!empty($GLOBALS['config']['helper_alias']) && array_key_exists($name, $GLOBALS['config']['helper_alias']) ){
-            $alias = $GLOBALS['config']['helper_alias'][$name];
-
-            $file = $GLOBALS['project_root'].$dir.'helper/'.$alias.'.php';
-            if (file_exists($file)) {
-                //helper类文件的文件名、类名、app中的调用方法三者需要一致
-                require_once($file);
-                $this->helper[$name] = new $alias;
-                return $this->helper[$name];
-            }
-
-            //将驼峰式的名称用下划线分割
-            $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $alias);
-            $path = explode('_', $path, 2);
-            if (count($path)>1){
-                $path = $path[0].'/'.$alias;
-            }
-            else{
-                $path = $path[0].'/'.$alias;
-            }
-            $file = $GLOBALS['project_root'].$dir.$path.'.php';
-            if (file_exists($file)) {
-                //helper类文件的文件名、类名、app中的调用方法三者需要一致
-                require_once($file);
-                $this->helper[$name] = new $alias;
-                return $this->helper[$name];
-            }
-        }
-        throw new Exception('文件不存在：'.$file);
+        throw new Exception($this->lang('class_not_found').$name);
     }
 
     private function _class_name_to_path(string $name){
@@ -958,38 +954,7 @@ function find_file_in_dir($path, $filename){
 /**
  * 类的自动加载
 **/
-spl_autoload_register(function ($class_name) {
-    if($backtrace =debug_backtrace()){
-        $dir = '';
-        foreach ($backtrace as $item){
-            if (!empty($item['file'])){
-                $dir = dirname($item['file']);
-                break;
-            }
-        }
-        if ($dir){
-            if ($file = find_file_in_dir($dir,$class_name . '.php')){
-                require_once $file;
-                return;
-            }
-        }
-    }
-    $path = explode('_', $class_name, 2);
-    if (count($path)>1){
-        $path = $path[0].'/'.$class_name;
-    }
-    else{
-        $path = $path[0].'/'.$class_name;
-    }
-    if ($file = find_file_in_dir($GLOBALS['project_root'],$path . '.php' )){
-        require_once $file;
-        return;
-    }
-    if ($file = find_file_in_dir($GLOBALS['project_root'].'helper/',$class_name . '.php' )){
-        require_once $file;
-    }
-    return;
-});
+spl_autoload_register($app->autoload_class);
 
 if(PHP_SAPI=='cli'){
     //解析参数，传参数方式：在php文件名的加空格 再加用双引号包含的querystring格式的参数，例如：
