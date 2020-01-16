@@ -11,7 +11,7 @@ return [
     'welcome_to_the_yiluphp' => '欢迎使用YiluPHP框架！',
     'current_version' => '当前版本：',
     'official_website' => '官网：',
-    'free_and_open' => '这是一个免费的开源PHP框架：',
+    'free_and_open' => '这是一个免费开源的PHP框架：',
     'yiluphp_slogan' => '就是快： 学习快、 开发快、 运行快',
     'from_helper_result' => '这是来自辅助类helper的数据：',
     'from_model_result' => '这是来自模型类model的数据：',
