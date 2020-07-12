@@ -52,8 +52,8 @@ $config = [
         //default为默认的数据库连接名，你可以自定义其它名称
         'default' => [
             'dsn'   =>  'mysql:host=127.0.0.1;port=3306;dbname=yilu_uc',
-            'username'  =>  '你的数据库登录名',
-            'password'  =>  '你的数据库登录密码',
+            'username'  =>  'root', //你的数据库登录名
+            'password'  =>  'yiluPHP@2017', //你的数据库登录密码
             'charset'   =>  'utf8',
             'option'    =>  [],
         ]
