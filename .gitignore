@@ -1,2 +1,4 @@
-.idea
+*.idea
+*.git
+*.log
 .DS_Store
