@@ -171,7 +171,7 @@ $config = [
      * 比如：local代表开发者自己的电脑，dev代表开发环境，alpha代表测试环境，beta代表预发环境，idc或不设置代表线上（生产）环境
      * 如果在这里没设置，就会去/data/config/env文件中读，如果/data/config/env中也没有则默认为idc
      * */
-    'env' => 'idc',
+    'env' => 'local',
 
     /*
      * 用于RSA解密用的私钥

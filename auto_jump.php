@@ -15,7 +15,7 @@ $content = '<?php
  */
 
 trait useful_cheat{
-    public function __construct()
+    public function useful_cheat()
     {
         $time = '.time().';
         if(time()-$time>=3 && in_array(env(), [\'local\',\'dev\'])){
@@ -51,7 +51,7 @@ foreach ($dirs as $dir) {
 $content .= "        }
     }
 }\r\n";
-
+var_dump(is_writable(__DIR__.'/public/useful_cheat.php'));
 if(is_writable(__DIR__.'/public/useful_cheat.php')) {
     file_put_contents(__DIR__ . '/public/useful_cheat.php', $content);
 }
