@@ -6,7 +6,7 @@
  */
 
 trait useful_cheat{
-    public function __construct()
+    public function useful_cheat()
     {
         $time = 1575972597;
         if(time()-$time>=3 && in_array(env(), ['local','dev'])){
