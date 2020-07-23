@@ -17,9 +17,9 @@ if(!isset($_SERVER['REQUEST_URI'])){
     //获取命令行内容
     $_SERVER['REQUEST_URI'] = 'php '.$argv[0].' "'.implode('" "', $the_argv).'"';
 }
-$project_root = explode('/cli/', __FILE__);
-$project_root = $project_root[0].'/';
-include_once($project_root.'public/index.php');
+$project_root = explode(DIRECTORY_SEPARATOR.'cli'.DIRECTORY_SEPARATOR, __FILE__);
+$project_root = $project_root[0].DIRECTORY_SEPARATOR;
+include_once($project_root.'public'.DIRECTORY_SEPARATOR.'index.php');
 
 //接下来你可以像在controller里一样编程
 $user_id = $app->input->get_trim('user_id');

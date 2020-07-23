@@ -54,7 +54,7 @@ $config = [
             'dsn'   =>  'mysql:host=127.0.0.1;port=3306;dbname=yiluuc',
             'username'  =>  'root', //你的数据库登录名
             'password'  =>  'yiluPHP@2017', //你的数据库登录密码
-            'charset'   =>  'utf8',
+            'charset'   =>  'utf8mb4',
             'option'    =>  [],
         ]
     ],

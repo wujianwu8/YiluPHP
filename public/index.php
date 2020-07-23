@@ -10,7 +10,7 @@
  */
 
 !isset($project_root) && $project_root = substr(dirname(__FILE__), 0, -6);
-$config = require($project_root.'config/app.php');
+$config = require($project_root.'config'.DIRECTORY_SEPARATOR.'app.php');
 //当前登录用户的基本信息
 $self_info = null;
 
@@ -111,9 +111,11 @@ function write_applog(string $level, string $data='')
     if ($code!='UTF-8'){
         $txt = iconv($code, 'UTF-8', $txt);
     }
-    openlog("qcloud_db",LOG_PID, LOG_LOCAL5);
-    syslog(LOG_INFO, $txt);
-    closelog();
+    if (defined('LOG_LOCAL5')) {
+        openlog("qcloud_db", LOG_PID, LOG_LOCAL5);
+        syslog(LOG_INFO, $txt);
+        closelog();
+    }
     $file = $path.date('Y-m-d').'.log';
     file_put_contents($file, $txt."\n\n", FILE_APPEND);
     chmod($file,0755);
@@ -170,7 +172,7 @@ function add_to_queue($class_name, $data, $queue_name='default', $delay_second=0
 
     //如果是同步模式,则不写redis,直接运行队列文件
     if(!empty($GLOBALS['config']['queue_mode']) && $GLOBALS['config']['queue_mode']=='sync'){
-        $file = $GLOBALS['project_root'].'cli/queue/'.$class_name.'.php';
+        $file = $GLOBALS['project_root'].'cli'.DIRECTORY_SEPARATOR.'queue'.DIRECTORY_SEPARATOR.$class_name.'.php';
         if(!file_exists($file)){
             write_applog('ERROR', '未找到消息列表的实现文件:'.$file);
             return_code(CODE_UNDEFINED_ERROR_TYPE,'未找到消息列表的实现文件:'.$file);
@@ -251,7 +253,7 @@ function return_result($template, $data=[], $return_html=false)
         }
     }
 
-    $YiluPHP['file'] = $GLOBALS['project_root'].'template/'.$YiluPHP['template_name'].'.php';
+    $YiluPHP['file'] = $GLOBALS['project_root'].'template'.DIRECTORY_SEPARATOR.$YiluPHP['template_name'].'.php';
     if(!file_exists($YiluPHP['file'])) {
         unset($YiluPHP['template_name'], $YiluPHP['return_html']);
         return_code(CODE_UNDEFINED_ERROR_TYPE,'模板不存在：' . $YiluPHP['file']);
@@ -531,7 +533,7 @@ class YiluPHP
     {
         $this->useful_cheat();
         $this->autoload_class = function ($class_name){
-            $file = $GLOBALS['project_root'].'helper/'.$class_name.'.php';
+            $file = $GLOBALS['project_root'].'helper'.DIRECTORY_SEPARATOR.$class_name.'.php';
             if (file_exists($file)) {
                 //helper类文件的文件名、类名、app中的调用方法三者需要一致
                 require_once($file);
@@ -541,7 +543,7 @@ class YiluPHP
             //将驼峰式的名称用下划线分割
             $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $class_name);
             $path = explode('_', $path, 2);
-            $path = $path[0].'/'.$class_name;
+            $path = $path[0].DIRECTORY_SEPARATOR.$class_name;
             $file = $GLOBALS['project_root'].$path.'.php';
             if (file_exists($file)) {
                 //类文件的文件名、类名、app中的调用方法三者需要一致
@@ -552,7 +554,7 @@ class YiluPHP
             //支持给类取别名
             if(!empty($GLOBALS['config']['helper_alias']) && array_key_exists($class_name, $GLOBALS['config']['helper_alias']) ){
                 $real_class_name = $GLOBALS['config']['helper_alias'][$class_name];
-                $file = $GLOBALS['project_root'].'helper/'.$real_class_name.'.php';
+                $file = $GLOBALS['project_root'].'helper'.DIRECTORY_SEPARATOR.$real_class_name.'.php';
                 if (file_exists($file)) {
                     require_once($file);
                     return $real_class_name;
@@ -561,7 +563,7 @@ class YiluPHP
                 //将驼峰式的名称用下划线分割
                 $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $real_class_name);
                 $path = explode('_', $path, 2);
-                $path = $path[0].'/'.$real_class_name;
+                $path = $path[0].DIRECTORY_SEPARATOR.$real_class_name;
                 $file = $GLOBALS['project_root'].$path.'.php';
                 if (file_exists($file)) {
                     require_once($file);
@@ -676,29 +678,29 @@ class YiluPHP
         $res = $lang_key;
         if(!$this->lang){
             //载入OnoWayPHP系统语言包
-            $file = $project_root.'system/lang/'.$GLOBALS['config']['lang'].'.php';
+            $file = $project_root.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
             if(file_exists($file)){
                 $this->lang = require_once($file);
             }
             else{
-                $this->lang = require_once($project_root.'system/lang/cn.php');
+                $this->lang = require_once($project_root.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'cn.php');
             }
             //载入用户的语言包
-            $file = $project_root.'lang/'.$GLOBALS['config']['lang'].'.php';
+            $file = $project_root.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
             if(file_exists($file)){
                 $this->lang = array_merge(require_once($file), $this->lang);
             }
-            else if(file_exists($project_root.'lang/cn.php')){
-                $this->lang = array_merge(require_once($project_root.'lang/cn.php'), $this->lang);
+            else if(file_exists($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php')){
+                $this->lang = array_merge(require_once($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php'), $this->lang);
             }
             else{
-                return_code(CODE_UNDEFINED_ERROR_TYPE,$app->lang('no_translation_file'). '：/lang/'.$GLOBALS['config']['lang'].'.php');
+                return_code(CODE_UNDEFINED_ERROR_TYPE,$app->lang('no_translation_file'). '：'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php');
             }
         }
         if(!isset($this->lang[$lang_key])){
             //如果指定的翻译没有，则尝试使用中文的
-            if( $GLOBALS['config']['lang']!=='cn' && file_exists($project_root.'lang/cn.php')){
-                $lang = require $project_root.'lang/cn.php';
+            if( $GLOBALS['config']['lang']!=='cn' && file_exists($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php')){
+                $lang = require $project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php';
                 if(isset($lang[$lang_key])){
                     $res = $lang[$lang_key];
                 }
@@ -756,7 +758,7 @@ class YiluPHP
      */
     public function load_page_lang($lang_file)
     {
-        $file = $GLOBALS['project_root'].'lang/'.$lang_file.'.php';
+        $file = $GLOBALS['project_root'].'lang'.DIRECTORY_SEPARATOR.$lang_file.'.php';
         if(file_exists($file)){
             $this->page_lang = array_merge(require_once($file), $this->page_lang);
         }
@@ -803,16 +805,16 @@ class YiluPHP
     private function _class_name_to_path(string $name){
         $name = explode('_', $name, 2);
         if (count($name)>1){
-            return $name[0].'/'.$name[1];
+            return $name[0].DIRECTORY_SEPARATOR.$name[1];
         }
         else{
-            return $name[0].'/'.$name[0];
+            return $name[0].DIRECTORY_SEPARATOR.$name[0];
         }
     }
 
     public function __call($name, $arguments)
     {
-        $file = 'helper/'.$name.'.php';
+        $file = 'helper'.DIRECTORY_SEPARATOR.$name.'.php';
         if (file_exists($file)) {
             //helper类文件的文件名、类名、app中的调用方法三者需要一致
             require_once($file);
@@ -907,8 +909,8 @@ function env(){
     if (!empty($GLOBALS['config']['env'])){
         return $GLOBALS['config']['env'];
     }
-    if (file_exists('/data/config/env')){
-        return trim(file_get_contents('/data/config/env'));
+    if (file_exists(DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'env')){
+        return trim(file_get_contents(DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'env'));
     }
     return 'idc';
 }
@@ -1009,7 +1011,14 @@ else{
     }
 
     //解析URL路由和参数
-    $url = explode('?', $_SERVER['REQUEST_URI']);
+    if (isset($_SERVER['CONTEXT_PREFIX'])){
+        //兼容wampserver的虚拟主机模式，型如：http://localhost/test，其中test就是独立的主机名称，即CONTEXT_PREFIX的值
+        $request_uri = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['CONTEXT_PREFIX']));
+    }
+    else{
+        $request_uri = $_SERVER['REQUEST_URI'];
+    }
+    $url = explode('?', $request_uri);
     $request_uri = $url[0];
     if($request_uri!='/' && !empty($config['rewrite_route'])){
         foreach ($config['rewrite_route'] as $key => $value){

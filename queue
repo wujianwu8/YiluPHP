@@ -21,9 +21,9 @@ if(!isset($_SERVER['REQUEST_URI'])){
     unset($the_argv[0]);
     $_SERVER['REQUEST_URI'] = 'php '.$argv[0].' "'.implode('" "', $the_argv).'"';
 }
-$project_root = dirname(__FILE__).'/';
-include_once($project_root.'public/index.php');
-include_once($project_root.'system/cli/queue.class.php');
+$project_root = dirname(__FILE__).DIRECTORY_SEPARATOR;
+include_once($project_root.'public'.DIRECTORY_SEPARATOR.'index.php');
+include_once($project_root.'system'.DIRECTORY_SEPARATOR.'cli'.DIRECTORY_SEPARATOR.'queue.class.php');
 
 $queue_name = isset($_GET['queue_name'])?trim($_GET['queue_name']):null;
 if(!$queue_name){
