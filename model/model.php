@@ -227,11 +227,11 @@ class model
         $table_name = $this->sub_table($field_value);
         $connection = $this->sub_connection($field_value);
 
-        if(!preg_match("/^[\(\)\d\s\w-_,`]*$/",$order_by)){
+        if(!preg_match("/^[\(\)\d\s\w\-_,`]*$/",$order_by)){
             write_applog('ERROR', 'arguments $order_by is illegal: '.$order_by);
             throw new Exception('arguments $order_by is illegal: '.$order_by, CODE_ERROR_IN_MODEL);
         }
-        if(!preg_match("/^[\(\)\d\s\w-_\`,\(\)\*]*$/",$fields)){
+        if(!preg_match("/^[\(\)\d\s\w\-_\`,\(\)\*]*$/",$fields)){
             write_applog('ERROR', 'arguments $fields is illegal: '.$fields);
             throw new Exception('arguments $fields is illegal: '.$fields, CODE_ERROR_IN_MODEL);
         }
@@ -323,11 +323,11 @@ class model
         $table_name = $this->sub_table($field_value);
         $connection = $this->sub_connection($field_value);
 
-        if(!preg_match("/^[\(\)\d\s\w-_,`]*$/",$order_by)){
+        if(!preg_match("/^[\(\)\d\s\w\-_,`]*$/i",$order_by)){
             write_applog('ERROR', 'arguments $order_by is illegal: '.$order_by);
             throw new Exception('arguments $order_by is illegal: '.$order_by, CODE_ERROR_IN_MODEL);
         }
-        if(!preg_match("/^[\(\)\d\s\w-_,`\(\)\*]*$/",$fields)){
+        if(!preg_match("/^[\(\)\d\s\w\-_,`\(\)\*]*$/",$fields)){
             write_applog('ERROR', 'arguments $fields is illegal: '.$fields);
             throw new Exception('arguments $fields is illegal: '.$fields, CODE_ERROR_IN_MODEL);
         }
@@ -406,7 +406,7 @@ class model
         $table_name = $this->sub_table($field_value);
         $connection = $this->sub_connection($field_value);
 
-        if($fields!=="*" && !preg_match("/^[\(\)\d\s\w-_,`]*$/",$fields)){
+        if($fields!=="*" && !preg_match("/^[\(\)\d\s\w\-_,`]*$/",$fields)){
             write_applog('ERROR', 'arguments $fields is illegal: '.$fields);
             throw new Exception('arguments $fields is illegal: '.$fields, CODE_ERROR_IN_MODEL);
         }

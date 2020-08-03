@@ -56,7 +56,6 @@ class curl
 //        }
 
         $this->setOption(CURLOPT_HTTPGET, true);
-        Log::info($this->buildUrl($url, $params));
         $response = $this->exec($this->buildUrl($url, $params));
         $this->close();
         return $response;
