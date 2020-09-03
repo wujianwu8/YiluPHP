@@ -1,0 +1,24 @@
+<VirtualHost *:80>
+	DocumentRoot D:/web/www.yiluphp.com/
+	ServerName www.yiluphp.com
+
+    #打开rewirte功能
+	RewriteEngine on
+
+	#指定后缀的静态文件指向static目录
+	#符合指定后缀的文件请求做以下RewriteRule的请求重写，其中[NC]的意思是忽略大小写
+	RewriteCond %{REQUEST_FILENAME} \.(html|htm|css|js|jpg|gif|jpeg|png)$ [NC]
+	#其中[L]意味着立即停止重写操作，并不再应用其他重写规则。
+	RewriteRule ^(.*)$ /static$1 [L]
+
+	#除了上面指定的静态文件，其它所有请求都指向public目录，并且隐藏index.php
+	#当被替换的URI包含有query string的时候，apache的默认行为是，丢弃原有的query string 并直接使用新产生的query string，如果加上了[QSA]选项，那么旧的query string 将会与新产生的query string组合起来，产生一个新的query string
+	#在RewriteRule中的目标串（被替换完的路径）都会被看做是文件路径，使用[PT]选项能够让apache将其看作是URI来对待。这也就是说，使用了[PT]选项，能够使得RewriteRule的结果重新加入到URL的匹配当中去，让那些基于本地匹配的，例如Alias, Redirect, or ScriptAlias,能够有生效的机会。
+	RewriteRule ^(.*)$ /public/index.php [QSA,PT,L]
+
+	<Directory D:/web/www.yiluphp.com/ >
+		#禁止读取".htaccess"配置文件
+		AllowOverride none
+		Require all granted
+	</Directory>
+</VirtualHost>
