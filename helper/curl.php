@@ -47,7 +47,6 @@ class curl
         }
         //如果是本地或开发环境，使用代理访问
 //        if(in_array(env(), ['local', 'dev'])){
-//            $this->setOption(CURLOPT_RETURNTRANSFER, true);
 //            $this->setOption(CURLOPT_HTTPPROXYTUNNEL, true);
 //            $this->setOption(CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 //            $this->setOption(CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
@@ -55,6 +54,7 @@ class curl
 //            $this->setOption(CURLOPT_PROXYPORT, '1080');
 //        }
 
+        $this->setOption(CURLOPT_RETURNTRANSFER, true);
         $this->setOption(CURLOPT_HTTPGET, true);
         $response = $this->exec($this->buildUrl($url, $params));
         $this->close();
