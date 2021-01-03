@@ -3,7 +3,7 @@
  * 入口文件，所有的PHP请求请求从这里开始
  * 包含配置文件、公共函数库、创建$app实例、转发到指定的controller文件
  * 此文件中创建的实例$app，连接数据库和redis都通过此实例
- * YiluPHP vision 1.0
+ * YiluPHP vision 1.0 
  * User: Jim.Wu
  * Date: 19/12/27
  * Time: 19:21
