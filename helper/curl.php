@@ -1,10 +1,10 @@
 <?php
 /*
  * CURL方法类
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/10/08
- * Time: 22:55
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 class curl

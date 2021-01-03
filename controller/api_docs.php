@@ -54,13 +54,13 @@ if (!isset($_COOKIE['vk'])){
 }
 $cache_key = 'VISIT_API_DOCS_SIGN_'.$_COOKIE['vk'];
 if (!empty($_GET['logout'])){
-    $app->redis()->del($cache_key);
+    redis_y::I()->del($cache_key);
 }
 $is_login = false;
 
 if (!empty($config['visit_api_docs_password'])){
-    if ($app->redis()->exists($cache_key)){
-        $app->redis()->EXPIRE($cache_key, 3600);
+    if (redis_y::I()->exists($cache_key)){
+        redis_y::I()->EXPIRE($cache_key, 3600);
         $is_login = true;
     }
     else{
@@ -69,8 +69,8 @@ if (!empty($config['visit_api_docs_password'])){
         }
         else{
             if ($config['visit_api_docs_password'] == $_POST['passport']){
-                $app->redis()->set($cache_key, 1);
-                $app->redis()->EXPIRE($cache_key, 3600);
+                redis_y::I()->set($cache_key, 1);
+                redis_y::I()->EXPIRE($cache_key, 3600);
                 $is_login = true;
             }
             else{
@@ -108,8 +108,8 @@ $menu_list = [
 //    ...
 ];
 
-$path = $app->input->get_trim('path', '');
-$version = $app->input->get_trim('version', '');
+$path = input::I()->get_trim('path', '');
+$version = input::I()->get_trim('version', '');
 $first_api = null;
 $current_api = null;
 $version_list = [];
@@ -242,8 +242,8 @@ function showVisitApiDosLoginUI(){
 //            ],
 //        ],
 function parseApiAnnotation($file){
-    global $version_list, $app;
-    $keyword = $app->input->get_trim('keyword', '');
+    global $version_list;
+    $keyword = input::I()->get_trim('keyword', '');
     if ($keyword){
         $in_search = false;
     }

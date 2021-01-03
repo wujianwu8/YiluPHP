@@ -1,16 +1,29 @@
 <?php
 /*
  * 模型类，样例文件，可删除
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/11/16
- * Time: 11:33
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 class model_demo extends model
 {
+    //存储单例
+    private static $_instance = null;
     //数据表名称
     protected $_table = 'table_name_demo';
+
+    /**
+     * 获取单例
+     * @return model|null 返回单例
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new self();
+        }
+        return static::$_instance;
+    }
 
     /**
      * @name 给controller调用

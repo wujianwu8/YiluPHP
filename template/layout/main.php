@@ -66,7 +66,7 @@
         }
     </style>
     <script src="/js_config"></script>
-    <script src="/js/language/<?php echo $app->current_lang(); ?>.js"></script>
+    <script src="/js/language/<?php echo YiluPHP::I()->current_lang(); ?>.js"></script>
     <script src="https://www.yiluphp.com/js/vendor/jquery-3.4.1.min.js"></script>
     <script src="https://www.yiluphp.com/js/vendor/jsencrypt.min.js"></script>
     <script src="/js/base.js"></script>
@@ -77,13 +77,13 @@
 <nav>
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="<?php echo $app->lang('website_logo_img'); ?>" height="35">
+            <img src="<?php echo YiluPHP::I()->lang('website_logo_img'); ?>" height="35">
         </a>
         <div class="lang">
             <a href="<?php echo add_url_params(get_host_url(), ['lang'=>'cn']); ?>"
-               class="<?php echo $app->current_lang()=='cn'?'active':''; ?>" style="margin-right: 1rem;">中文</a>
+               class="<?php echo YiluPHP::I()->current_lang()=='cn'?'active':''; ?>" style="margin-right: 1rem;">中文</a>
             <a href="<?php echo add_url_params(get_host_url(), ['lang'=>'en']); ?>"
-               class="<?php echo $app->current_lang()=='en'?'active':''; ?>">English</a>
+               class="<?php echo YiluPHP::I()->current_lang()=='en'?'active':''; ?>">English</a>
         </div>
     </div>
 </nav>
@@ -97,10 +97,10 @@
 <footer>
     <div class="container">
         <div>
-            <?php echo $app->lang('free_and_open'); ?>
-            <a target="_blank" href="https://www.yiluphp.com/"><?php echo $app->lang('yiluphp_name'); ?></a>
+            <?php echo YiluPHP::I()->lang('free_and_open'); ?>
+            <a target="_blank" href="https://www.yiluphp.com/"><?php echo YiluPHP::I()->lang('yiluphp_name'); ?></a>
         </div>
-        <div><?php echo $app->lang('yiluphp_slogan'); ?></div>
+        <div><?php echo YiluPHP::I()->lang('yiluphp_slogan'); ?></div>
     </div>
 </footer>
 </body>

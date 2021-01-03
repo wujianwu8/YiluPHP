@@ -1,12 +1,12 @@
 <?php
 /*
  * 入口文件，所有的PHP请求请求从这里开始
- * 包含配置文件、公共函数库、创建$app实例、转发到指定的controller文件
- * 此文件中创建的实例$app，连接数据库和redis都通过此实例
- * YiluPHP vision 1.0
+ * 包含配置文件、公共函数库、创建YiluPHP实例、转发到指定的controller文件
+ * 此文件中创建的实例YiluPHP实例，连接数据库和redis都通过此实例
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/12/27
- * Time: 19:21
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 !isset($project_root) && $project_root = substr(dirname(__FILE__), 0, -6);
@@ -61,7 +61,7 @@ else if(isset($_COOKIE['lang']) && trim($_COOKIE['lang'])!='' ){
  * 获取系统版本号
  */
 function get_version(){
-    return 'YiluPHP-V1.0';
+    return 'YiluPHP-V2.0';
 }
 
 /*
@@ -121,37 +121,6 @@ function write_applog(string $level, string $data='')
     chmod($file,0755);
 }
 
-function connectMysql($options)
-{
-    try {
-        $pdo = new PDO(
-            $options['dsn'],
-            $options['username'],
-            $options['password'],
-            $options['option']
-        );
-        // 设置 PDO 错误模式为异常，用于抛出异常
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        //是否在提取的时候将数值转换为字符串
-        $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-        if (isset($options['charset'])) {
-            $pdo->exec('SET NAMES "'.$options['charset'].'"');
-        }
-        return $pdo;
-    }
-    catch (PDOException $e) {
-        write_applog('ERROR', '连接数据库失败，错误信息：'.$e->getMessage()
-            .'，连接参数：'.json_encode($options, JSON_UNESCAPED_UNICODE));
-        throw new Exception($e->getMessage());
-    }
-}
-
-function connectRedis($options)
-{
-    $redis = new Redis();
-    $redis->pconnect($options['host'], $options['port']);
-    return $redis;
-}
 
 /**
  * @name 往消息队列中增加消息
@@ -186,8 +155,8 @@ function add_to_queue($class_name, $data, $queue_name='default', $delay_second=0
         return $queue->run($data);
     }
 
-    if(!$GLOBALS['app']->redis()->hexists('yiluphp_queue_list_for_manage', $queue_name)
-        && !$GLOBALS['app']->redis()->hset('yiluphp_queue_list_for_manage', $queue_name, json_encode(['status'=>'running']))){
+    if(!redis_y::I()->hexists('yiluphp_queue_list_for_manage', $queue_name)
+        && !redis_y::I()->hset('yiluphp_queue_list_for_manage', $queue_name, json_encode(['status'=>'running']))){
         is_array($data) && $data = json_encode($data);
         write_applog('ERROR', '添加到消息队列时,存入管理列表失败, $queue_name:'.$queue_name.',$to_first:'.($to_first?'true':'false').',$data:'.$data);
         return false;
@@ -201,10 +170,10 @@ function add_to_queue($class_name, $data, $queue_name='default', $delay_second=0
         $msg['delay'] = $delay_second;
     }
     if($to_first){
-        $res = $GLOBALS['app']->redis()->lpush('yiluphp_queue'.$queue_name, json_encode($msg));
+        $res = redis_y::I()->lpush('yiluphp_queue'.$queue_name, json_encode($msg));
     }
     else{
-        $res = $GLOBALS['app']->redis()->rpush('yiluphp_queue'.$queue_name, json_encode($msg));
+        $res = redis_y::I()->rpush('yiluphp_queue'.$queue_name, json_encode($msg));
     }
     if($res===false){
         is_array($data) && $data = json_encode($data);
@@ -218,9 +187,6 @@ function throw404()
     //抛出404
     header('HTTP/1.1 404 Not Found');
     header("status: 404 Not Found");
-    if(isset($GLOBALS['app'])){
-        unset($GLOBALS['app']);
-    }
     exit;
 }
 
@@ -241,7 +207,7 @@ function return_result($template, $data=[], $return_html=false)
     unset($template, $data, $return_html);
 
     //可传参数with_layout决定最多允许的layout层次数,null为默认的20层,0表示不使用layout
-    $YiluPHP['with_layout'] = $GLOBALS['app']->input->request_int('with_layout', null);
+    $YiluPHP['with_layout'] = input::I()->request_int('with_layout', null);
     if($YiluPHP['with_layout'] === null) {
         if (!$YiluPHP['template_name'] || (isset($_REQUEST['dtype']) && in_array(strtolower($_REQUEST['dtype']), ['json', 'jsonp']))) {
             unset($YiluPHP['template_name'], $YiluPHP['return_html']);
@@ -272,11 +238,11 @@ function return_result($template, $data=[], $return_html=false)
     $YiluPHP['check_layout_status'] = preg_match_all('/<!--\{use_layout\s+(\S+)\}-->\s*/', $YiluPHP['cache_string'], $YiluPHP['matches'], PREG_SET_ORDER);
     if(false === $YiluPHP['check_layout_status']){
         unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html']);
-        return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('parsing_template_fail').'：'.$YiluPHP['file']);
+        return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('parsing_template_fail').'：'.$YiluPHP['file']);
     }
     if($YiluPHP['check_layout_status']>1){
         unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html']);
-        return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('one_template_only_one_layout').'：'.$YiluPHP['file']);
+        return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('one_template_only_one_layout').'：'.$YiluPHP['file']);
     }
     $YiluPHP['loop_time'] = 0;
     //层层向上解析模板中使用到的布局
@@ -289,14 +255,14 @@ function return_result($template, $data=[], $return_html=false)
         if($YiluPHP['loop_time']>20){
             unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html'], $YiluPHP['loop_time']);
             //模板嵌套太多布局了
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('too_many_nested_layouts').'：'.$YiluPHP['file']);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('too_many_nested_layouts').'：'.$YiluPHP['file']);
         }
         $YiluPHP['loop_time']++;
 
         $YiluPHP['file'] = $GLOBALS['project_root'].'template/'.$YiluPHP['matches'][0][1].'.php';
         if(!file_exists($YiluPHP['file'])) {
             unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html']);
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('layout_file_not_exists') . '：' . $YiluPHP['file']);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('layout_file_not_exists') . '：' . $YiluPHP['file']);
         }
 
         ob_start(); //打开缓冲区
@@ -309,7 +275,7 @@ function return_result($template, $data=[], $return_html=false)
         //检查layout中是否存在内容的占位符
         if(false === strpos($YiluPHP['layout_cache_string'], '<!--{$contents}-->')){
             unset($YiluPHP['template_name'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html'], $YiluPHP['layout_cache_string']);
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('layout_file_have_no_content_replacer').'：'.$YiluPHP['file']);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('layout_file_have_no_content_replacer').'：'.$YiluPHP['file']);
         }
 
         //把模板插入到布局中
@@ -317,11 +283,11 @@ function return_result($template, $data=[], $return_html=false)
         $YiluPHP['check_layout_status'] = preg_match_all('/<!--\{use_layout\s+(\S+)\}-->\s*/', $YiluPHP['cache_string'], $YiluPHP['matches'], PREG_SET_ORDER);
         if(false === $YiluPHP['check_layout_status']){
             unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html']);
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('parsing_template_fail').'：'.$YiluPHP['file']);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('parsing_template_fail').'：'.$YiluPHP['file']);
         }
         if($YiluPHP['check_layout_status']>1){
             unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html']);
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('one_template_only_one_layout').'：'.$YiluPHP['file']);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('one_template_only_one_layout').'：'.$YiluPHP['file']);
         }
         unset($YiluPHP['layout_cache_string']);
     }
@@ -357,9 +323,6 @@ function return_result($template, $data=[], $return_html=false)
     echo $YiluPHP['cache_string'];
     unset($YiluPHP);
     after_controller();
-    if(isset($GLOBALS['app'])){
-        unset($GLOBALS['app']);
-    }
     exit;
 }
 
@@ -392,7 +355,7 @@ function return_code($code, $msg='', $data=[])
         && !empty($GLOBALS['config']['inner_error_code'][1])
         && $code>=$GLOBALS['config']['inner_error_code'][0]
         && $code<=$GLOBALS['config']['inner_error_code'][1]){
-        $msg = $GLOBALS['app']->lang('inner_error');
+        $msg = YiluPHP::I()->lang('inner_error');
     }
 
     if(isset($_REQUEST['dtype']) && in_array(strtolower($_REQUEST['dtype']), ['json', 'jsonp'])){
@@ -432,7 +395,7 @@ function return_json($code, $msg='', $data=[])
         && !empty($GLOBALS['config']['inner_error_code'][1])
         && $code>=$GLOBALS['config']['inner_error_code'][0]
         && $code<=$GLOBALS['config']['inner_error_code'][1]){
-        $msg = $GLOBALS['app']->lang('inner_error');
+        $msg = YiluPHP::I()->lang('inner_error');
     }
     $res = ['code'=>$code, 'msg'=>$msg, 'data'=>$data];
     if(is_debug_mode()){
@@ -450,9 +413,6 @@ function return_json($code, $msg='', $data=[])
     write_applog('RESPONSE', $res);
     echo $res;
     after_controller();
-    if(isset($GLOBALS['app'])){
-        unset($GLOBALS['app']);
-    }
     unset($res);
     exit;
 }
@@ -472,7 +432,7 @@ function return_jsonp($code, $msg='', $data=[])
         && !empty($GLOBALS['config']['inner_error_code'][1])
         && $code>=$GLOBALS['config']['inner_error_code'][0]
         && $code<=$GLOBALS['config']['inner_error_code'][1]){
-        $msg = $GLOBALS['app']->lang('inner_error');
+        $msg = YiluPHP::I()->lang('inner_error');
     }
     $backtrace = 'null';
     if(is_debug_mode()){
@@ -493,9 +453,6 @@ function return_jsonp($code, $msg='', $data=[])
     write_applog('RESPONSE', $res);
     echo $res;
     after_controller();
-    if(isset($GLOBALS['app'])){
-        unset($GLOBALS['app']);
-    }
     unset($res);
     exit;
 }
@@ -508,30 +465,42 @@ function after_controller()
 {
     if(!empty($GLOBALS['config']['after_controller']) && is_array($GLOBALS['config']['after_controller'])){
         foreach($GLOBALS['config']['after_controller'] as $class_name){
-            $GLOBALS['app']->$class_name;
+            $class_name::I()->init();
         }
     }
 }
-if(!empty(env()) && in_array(strtolower(env()), ['dev', 'local'])){
-    include_once 'useful_cheat.php';
-}
-else{
-    eval('trait useful_cheat{public function useful_cheat(){}}');
-}
+
 
 class YiluPHP
 {
-    use useful_cheat;
-    public $mysql_list = [];
-    public $redis_list = [];
+    //存储单例
+    private static $_instance;
+    //项目的根目录，最后包含一个斜杠
+    public static $project_root;
     public $helper = [];
     protected $lang = [];
     protected $page_lang = [];
     public $autoload_class = null;
 
-    public function __construct()
+    /**
+     * 获取单例
+     * @return model|null 返回单例
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new self();
+        }
+        return static::$_instance;
+    }
+
+    //防止使用clone克隆对象
+    private function __clone(){}
+
+    //防止使用new直接创建对象
+    private function __construct()
     {
-        $this->useful_cheat();
+        global $project_root;
+        static::$project_root = $project_root;
         $this->autoload_class = function ($class_name){
             $file = $GLOBALS['project_root'].'helper'.DIRECTORY_SEPARATOR.$class_name.'.php';
             if (file_exists($file)) {
@@ -574,84 +543,6 @@ class YiluPHP
         };
     }
 
-    public function __destruct()
-    {
-        foreach ($this->mysql_list as $key => &$pdo) {
-            $pdo = null;
-            unset($this->mysql_list[$key]);
-        }
-        foreach ($this->redis_list as $key => &$redis) {
-            $redis->close();
-            unset($this->redis_list[$key]);
-        }
-    }
-
-    /**
-     * 检查连接是否可用
-     * @param Link $dbconn 数据库连接
-     * @return Boolean
-     */
-    private function _pdo_ping($dbconn){
-        try{
-            $dbconn->getAttribute(PDO::ATTR_SERVER_INFO);
-        } catch (PDOException $e) {
-            if(strpos($e->getMessage(), 'MySQL server has gone away')!==false){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 获取一个MySQL连接实例
-     * @access public
-     * @param string $db_key 在配置文件中，数据库配置使用的键名
-     * @return object 返回已经建立连接好的对象
-     */
-    public function mysql($db_key='default')
-    {
-        $db_key = empty($db_key)?'default':$db_key;
-        if (!isset($GLOBALS['config']['mysql'][$db_key]) ) {
-            throw new Exception('MySQL数据库配置不存在：$config[\'mysql\'][\''.$db_key.'\']');
-        }
-        if(isset($this->mysql_list[$db_key])){
-            //检查连接是否断开
-            if(!$this->_pdo_ping($this->mysql_list[$db_key])){
-                unset($this->mysql_list[$db_key]);
-            }
-        }
-        if ( !isset($this->mysql_list[$db_key]) && isset($GLOBALS['config']['mysql'][$db_key]) ) {
-            $this->mysql_list[$db_key] = connectMysql($GLOBALS['config']['mysql'][$db_key]);
-        }
-        return $this->mysql_list[$db_key];
-    }
-
-    /**
-     * @name 获取一个Redis连接实例
-     * @desc 获取一个Redis连接实例
-     * @param string $redis_config_key 在配置文件中，Redis配置使用的键名
-     * @param integer $db 切换到指定的数据库，数据库索引号用数字值指定，以 0 作为起始索引值,默认的配置中最多15个库
-     * @return object 返回已经建立连接好的对象
-     * @throws \Exception
-     */
-    public function redis($redis_config_key='default', $db=0)
-    {
-        $redis_config_key = empty($redis_config_key)?'default':$redis_config_key;
-        if (!isset($GLOBALS['config']['redis'][$redis_config_key]) ) {
-            throw new Exception('Redis配置不存在：$config[\'redis\'][\''.$redis_config_key.'\']');
-        }
-        if(isset($this->redis_list[$redis_config_key])){
-            //检查连接是否断开
-            if($this->redis_list[$redis_config_key]->ping()!=='+PONG'){
-                unset($this->redis_list[$redis_config_key]);
-            }
-        }
-        if ( !isset($this->redis_list[$redis_config_key]) ) {
-            $this->redis_list[$redis_config_key] = connectRedis($GLOBALS['config']['redis'][$redis_config_key]);
-        }
-        $this->redis_list[$redis_config_key]->select($db);
-        return $this->redis_list[$redis_config_key];
-    }
 
     /**
      * 获取当前用户使用的语言
@@ -674,7 +565,7 @@ class YiluPHP
     public function lang($lang_key, $data=[])
     {
         $this->current_lang();
-        global $app, $project_root;
+        global $project_root;
         $res = $lang_key;
         if(!$this->lang){
             //载入OnoWayPHP系统语言包
@@ -694,7 +585,7 @@ class YiluPHP
                 $this->lang = array_merge(require_once($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php'), $this->lang);
             }
             else{
-                return_code(CODE_UNDEFINED_ERROR_TYPE,$app->lang('no_translation_file'). '：'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php');
+                return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('no_translation_file'). '：'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php');
             }
         }
         if(!isset($this->lang[$lang_key])){
@@ -707,8 +598,8 @@ class YiluPHP
             }
             else{
                 $res = $lang_key;
-                write_applog('ERROR', $app->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
-//                return_code(CODE_UNDEFINED_ERROR_TYPE,$app->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
+                write_applog('ERROR', YiluPHP::I()->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
+//                return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
             }
         }
         else{
@@ -746,7 +637,7 @@ class YiluPHP
     public function page_lang($lang_key, $data=[])
     {
         if(!isset($this->page_lang[$lang_key])){
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
         }
         return $this->page_lang[$lang_key];
     }
@@ -763,7 +654,7 @@ class YiluPHP
             $this->page_lang = array_merge(require_once($file), $this->page_lang);
         }
         else{
-            return_code(CODE_UNDEFINED_ERROR_TYPE,$GLOBALS['app']->lang('file_not_exists'). '：'.$file);
+            return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('file_not_exists'). '：'.$file);
         }
     }
 
@@ -822,7 +713,6 @@ class YiluPHP
         }
     }
 }
-$app = new YiluPHP();
 
 if(!empty($config['use_session'])) {
     /**
@@ -851,7 +741,7 @@ if(!empty($config['use_session'])) {
      */
     function sess_read($sess_id){
 //    echo 'session read';
-        $data = $GLOBALS['app']->redis()->get('SESSION_PREFIX:'.$sess_id);
+        $data = redis_y::I()->get('SESSION_PREFIX:'.$sess_id);
         return is_string($data) ? $data : '';
     }
 
@@ -864,11 +754,8 @@ if(!empty($config['use_session'])) {
     function sess_write($sess_id, $sess_content){
 //    echo 'session write';
         $maxlifetime = ini_get('session.gc_maxlifetime');
-        if(empty($GLOBALS['app'])){
-            $GLOBALS['app'] = new YiluPHP();
-        }
-        $GLOBALS['app']->redis()->set('SESSION_PREFIX:'.$sess_id, $sess_content);
-        $GLOBALS['app']->redis()->expire('SESSION_PREFIX:'.$sess_id, $maxlifetime);
+        redis_y::I()->set('SESSION_PREFIX:'.$sess_id, $sess_content);
+        redis_y::I()->expire('SESSION_PREFIX:'.$sess_id, $maxlifetime);
         return true;
     }
 
@@ -879,7 +766,7 @@ if(!empty($config['use_session'])) {
      */
     function sess_delete($sess_id){
 //    echo 'session delete';
-        $GLOBALS['app']->redis()->del('SESSION_PREFIX:'.$sess_id);
+        redis_y::I()->del('SESSION_PREFIX:'.$sess_id);
         return true;
     }
 
@@ -982,7 +869,7 @@ function find_file_in_dir($path, $filename){
 /**
  * 类的自动加载
 **/
-spl_autoload_register($app->autoload_class);
+spl_autoload_register(YiluPHP::I()->autoload_class);
 
 if(PHP_SAPI=='cli'){
     //解析参数，传参数方式：在php文件名的加空格 再加用双引号包含的querystring格式的参数，例如：
@@ -1006,7 +893,7 @@ else{
     //例如防csrf攻击、验证访问权限等等，可在配置文件中配置多个类，每个类必须包含run方法，因为从此方法开始执行
     if(!empty($config['before_controller']) && is_array($config['before_controller'])){
         foreach($config['before_controller'] as $class_name){
-            $app->$class_name;
+            YiluPHP::I()->$class_name;
         }
     }
 

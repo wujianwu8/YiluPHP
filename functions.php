@@ -1,10 +1,10 @@
 <?php
 /*
  * 函数库，用户可在此添加自己所需函数
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/12/30
- * Time: 09:43
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 /**

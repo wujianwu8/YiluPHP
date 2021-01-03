@@ -1,10 +1,10 @@
 <?php
 /*
  * 用户的配置文件
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/12/27
- * Time: 19:21
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 date_default_timezone_set('Asia/Shanghai');
@@ -28,6 +28,13 @@ define('TIME_10_SEC', 10); //10秒
 define('TIME_30_SEC', 30); //30秒
 
 define('CODE_USER_NOT_LOGIN', -1);	//用户未登录的错误码
+
+class config{
+    public static $root='aa';
+    public static function get($key){
+
+    }
+}
 
 /*
  * 全局配置信息

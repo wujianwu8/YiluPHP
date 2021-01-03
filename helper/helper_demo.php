@@ -2,13 +2,27 @@
 
 /**
  * 样例文件，可删除
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/12/27
- * Time: 19:21
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 class helper_demo
 {
+    //存储单例
+    private static $_instance = null;
+
+    /**
+     * 获取单例
+     * @return helper_demo|null
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new self();
+        }
+        return static::$_instance;
+    }
+
 	public function __construct()
 	{
 	}
@@ -25,7 +39,6 @@ class helper_demo
      */
 	public function test_helper()
 	{
-	    global $app;
-	    return $app->model_demo->test_for_helper();
+	    return model_demo::I()->test_for_helper();
 	}
 }

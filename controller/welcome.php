@@ -16,20 +16,20 @@
  *  100 参数错误[mobile]
  */
 
-$params = $app->input->validate(
+$params = input::I()->validate(
     [
         'article_id' => 'integer|min:1|max:10|return',
         'mobile' => 'string|rsa_encrypt|return',
     ],
     [
-        'article_id.*' => $app->lang('parameter_error_xxx', ['field'=>'article_id']),
+        'article_id.*' => YiluPHP::I()->lang('parameter_error_xxx', ['field'=>'article_id']),
     ],
     [
         'article_id.*' => 1,
     ]);
-$title = $app->input->get_trim('title');
+$title = input::I()->get_trim('title');
 if (mb_strlen($title)>3){
-    return_code(2, $app->lang('title_too_long'));
+    return_code(2, YiluPHP::I()->lang('title_too_long'));
 }
 
 //模板文件存放在 /template/welcome.php
@@ -38,6 +38,6 @@ return_result('welcome', [
     'article_id' => isset($params['article_id']) ? $params['article_id']:'',
     'mobile' => isset($params['mobile']) ? $params['mobile']:'',
     'title' => $title,
-    'test_helper' => $app->helper_demo->test_helper(),
-    'test_model' => $app->model_demo->find_test(),
+    'test_helper' => helper_demo::I()->test_helper(),
+    'test_model' => model_demo::I()->find_test(),
 ]);

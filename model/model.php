@@ -1,10 +1,10 @@
 <?php
 /*
  * 数据模型的基类
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/10/06
- * Time: 21:23
+ * Date: 2021.01.01
+ * Time: 11:19
  * 新增一条记录的方法名使用insert_开头
  * 新增多条记录的方法名使用add_开头
  * 新增(已存在则更新)一条记录的方法名使用save_开头
@@ -162,7 +162,7 @@ class model
         $where && $sql .= ' WHERE ';
         $sql .= implode(' AND ', $arr) . $extend_sql;
         try {
-            $stmt = $GLOBALS['app']->mysql($connection)->prepare($sql);
+            $stmt = mysql::I($connection)->prepare($sql);
             $where = array_merge($where, $extend_params);
             foreach ($where as $key => &$value) {
                 $direct_assign = true;
@@ -259,7 +259,7 @@ class model
         $start = ($page-1)*$page_size;
         $start<0 && $start = 0;
         try {
-            $stmt = $GLOBALS['app']->mysql($connection)->prepare($sql);
+            $stmt = mysql::I($connection)->prepare($sql);
             $where = array_merge($where, $extend_params);
             foreach ($where as $key => &$value) {
                 $direct_assign = true;
@@ -351,7 +351,7 @@ class model
         $where && $sql .= ' WHERE ';
         $sql .= implode(' AND ', $arr) . $extend_sql . (trim($order_by)!==''?' ORDER BY '.$order_by : '');
         try {
-            $stmt = $GLOBALS['app']->mysql($connection)->prepare($sql);
+            $stmt = mysql::I($connection)->prepare($sql);
             $where = array_merge($where, $extend_params);
             foreach ($where as $key => &$value) {
                 $direct_assign = true;
@@ -437,7 +437,7 @@ class model
         }
         $sql .= implode(' AND ', $arr) . ' ' .$extend_sql . ' LIMIT 1 ';
         try {
-            $stmt = $GLOBALS['app']->mysql($connection)->prepare($sql);
+            $stmt = mysql::I($connection)->prepare($sql);
             $where = array_merge($where, $extend_params);
             foreach ($where as $key => &$value) {
                 $direct_assign = true;
@@ -512,7 +512,7 @@ class model
         foreach($tables as $item) {
             $sql = 'INSERT INTO ' . $item['table_name'] . ' (`' . implode('`, `', $keys) . '`) VALUES (:' . implode(', :', $keys) . ')';
             try {
-                $stmt = $GLOBALS['app']->mysql($item['connection'])->prepare($sql);
+                $stmt = mysql::I($item['connection'])->prepare($sql);
                 foreach ($data as $key => $value) {
                     $stmt->bindValue(':' . $key, $value);
                 }
@@ -528,7 +528,7 @@ class model
                 throw new Exception($e->getMessage(), CODE_DB_ERR);
             }
             //若表中无自增的主键字段，则返回0
-            $res = $GLOBALS['app']->mysql($item['connection'])->lastInsertId();
+            $res = mysql::I($item['connection'])->lastInsertId();
         }
         unset($data, $tables, $keys, $sql);
         return $res;
@@ -592,7 +592,7 @@ class model
         foreach($tables as $item) {
             $sql = 'UPDATE ' . $item['table_name'] . ' SET ' . implode(',', $set) . ' WHERE ' . implode(' AND ', $where_sql) . $extend_sql;
             try {
-                $stmt = $GLOBALS['app']->mysql($item['connection'])->prepare($sql);
+                $stmt = mysql::I($item['connection'])->prepare($sql);
                 foreach ($data as $key => $value) {
                     $stmt->bindValue(':' . $key, $value);
                 }
@@ -691,7 +691,7 @@ class model
         $count = 0;
         foreach($tables as $item) {
             try {
-                $stmt = $GLOBALS['app']->mysql($item['connection'])->prepare('DELETE FROM ' . $item['table_name'].$sql);
+                $stmt = mysql::I($item['connection'])->prepare('DELETE FROM ' . $item['table_name'].$sql);
                 foreach ($where as $key => $value) {
                     $direct_assign = true;
                     if(is_array($value)){
@@ -788,7 +788,7 @@ class model
         $count = 0;
         foreach($tables as $item) {
             try {
-                $stmt = $GLOBALS['app']->mysql($item['connection'])->prepare('DELETE FROM ' . $item['table_name'].$sql);
+                $stmt = mysql::I($item['connection'])->prepare('DELETE FROM ' . $item['table_name'].$sql);
                 foreach ($where as $key => $value) {
                     $direct_assign = true;
                     if(is_array($value)){
@@ -859,7 +859,7 @@ class model
 
         $sql = 'UPDATE '.$this->get_table().' SET '.implode(',', $arr).' WHERE '.implode(' AND ', $where_arr). $extend_sql;
         $connection = $this->sub_connection();
-        $stmt = $GLOBALS['app']->mysql($connection)->prepare($sql);
+        $stmt = mysql::I($connection)->prepare($sql);
         $where = array_merge($where, $extend_params);
         foreach ($where as $key => $value){
             $stmt->bindValue(':'.$key, $value, is_numeric($value)?PDO::PARAM_INT:(is_string($value)?PDO::PARAM_STR:
@@ -886,35 +886,34 @@ class model
      */
     public function add_limit_field_count($vk_redis_key, $ip_redis_key, $ip_short_count_limit,
                                           $ip_hour_count_limit, $where, $data, string $extend_sql='', array $extend_params=[]){
-        global $app;
         $max_time = round(microtime(true)*10000);
         //增加该ip的浏览记录
-        $app->redis()->rpush($ip_redis_key, $max_time);
+        redis_y::I()->rpush($ip_redis_key, $max_time);
         //修剪掉超过3万的老数据
-        $app->redis()->ltrim($ip_redis_key, -$ip_hour_count_limit, -1);
+        redis_y::I()->ltrim($ip_redis_key, -$ip_hour_count_limit, -1);
         //续期1小时
-        $app->redis()->EXPIRE($ip_redis_key, TIME_HOUR);
+        redis_y::I()->EXPIRE($ip_redis_key, TIME_HOUR);
 
         //检查该ip在5秒内的浏览频率是否超过1千
-        $value = $app->redis()->lindex($ip_redis_key, $ip_short_count_limit);
+        $value = redis_y::I()->lindex($ip_redis_key, $ip_short_count_limit);
         if (!empty($value) && $value>=$max_time-50000){
             return false;
         }
         //检查该ip在1小时内的浏览频率是否超过3万
-        $value = $app->redis()->lindex($ip_redis_key, 0);
-        if ($app->redis()->llen($ip_redis_key)>=$ip_hour_count_limit && $value>=$max_time-(TIME_HOUR*10000)){
+        $value = redis_y::I()->lindex($ip_redis_key, 0);
+        if (redis_y::I()->llen($ip_redis_key)>=$ip_hour_count_limit && $value>=$max_time-(TIME_HOUR*10000)){
             return false;
         }
         //检查该vk在10分钟内是否增加过浏览次数
-        if ($app->redis()->exists($vk_redis_key)){
+        if (redis_y::I()->exists($vk_redis_key)){
             return false;
         }
         //增加浏览次数
         $this->update_count_field($where, $data, $extend_sql, $extend_params);
 
         //更新该vk最新增加浏览次数的时间
-        $app->redis()->set($vk_redis_key, 1);
-        $app->redis()->EXPIRE($vk_redis_key, TIME_15_MIN);
+        redis_y::I()->set($vk_redis_key, 1);
+        redis_y::I()->EXPIRE($vk_redis_key, TIME_15_MIN);
         return true;
     }
 }

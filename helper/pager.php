@@ -1,10 +1,10 @@
 <?php
 /*
  * 分页码类
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/12/27
- * Time: 19:21
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 class pager

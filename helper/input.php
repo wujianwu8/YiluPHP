@@ -1,10 +1,10 @@
 <?php
 /*
  * 请求参数处理类
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/10/04
- * Time: 20:33
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 if(file_exists('input_extend.php')){
@@ -17,6 +17,8 @@ if(!trait_exists('input_extend')){
 class input
 {
     use input_extend;
+    //存储单例
+    private static $_instance = null;
 
     protected $_default_error_code = [
         'required' => CODE_REQUIRED_PARAM_ERROR,
@@ -33,6 +35,17 @@ class input
         'equal' => CODE_EQUAL_PARAM_ERROR,
         'rsa_encrypt' => CODE_RSA_PARAM_ERROR,
     ];
+
+    /**
+     * 获取单例
+     * @return input|null
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new self();
+        }
+        return static::$_instance;
+    }
 
     /**
      * @name 获取默认错误在数组中的键
@@ -106,21 +119,20 @@ class input
      */
     private function _error_msg($key, $rule, &$rules, &$error_message=[])
     {
-        global $app;
         $default_msg = [
-            'required' => $app->lang('parameter_error_xxx', ['field' => $key]),
-            'numeric' => $app->lang('xxx_parameter_must_be_numeric', ['field' => $key]),
-            'integer' => $app->lang('xxx_parameter_must_be_a_integer', ['field' => $key]),
-            'string' => $app->lang('xxx_parameter_must_be_string', ['field' => $key]),
-            'array' => $app->lang('xxx_parameter_must_be_array', ['field' => $key]),
-            'email' => $app->lang('xxx_parameter_must_be_email', ['field' => $key]),
-            'json' => $app->lang('xxx_parameter_must_be_json', ['field' => $key]),
-            'string_min' => $app->lang('xxx_parameter_string_min_error', ['field' => $key]),
-            'string_max' => $app->lang('xxx_parameter_string_max_error', ['field' => $key]),
-            'numeric_min' => $app->lang('xxx_parameter_numeric_min_error', ['field' => $key]),
-            'numeric_max' => $app->lang('xxx_parameter_numeric_max_error', ['field' => $key]),
-            'equal' => $app->lang('xxx_parameter_equal_error', ['field' => $key]),
-            'rsa_encrypt' => $app->lang('xxx_parameter_rsa_encrypt_error', ['field' => $key]),
+            'required' => YiluPHP::I()->lang('parameter_error_xxx', ['field' => $key]),
+            'numeric' => YiluPHP::I()->lang('xxx_parameter_must_be_numeric', ['field' => $key]),
+            'integer' => YiluPHP::I()->lang('xxx_parameter_must_be_a_integer', ['field' => $key]),
+            'string' => YiluPHP::I()->lang('xxx_parameter_must_be_string', ['field' => $key]),
+            'array' => YiluPHP::I()->lang('xxx_parameter_must_be_array', ['field' => $key]),
+            'email' => YiluPHP::I()->lang('xxx_parameter_must_be_email', ['field' => $key]),
+            'json' => YiluPHP::I()->lang('xxx_parameter_must_be_json', ['field' => $key]),
+            'string_min' => YiluPHP::I()->lang('xxx_parameter_string_min_error', ['field' => $key]),
+            'string_max' => YiluPHP::I()->lang('xxx_parameter_string_max_error', ['field' => $key]),
+            'numeric_min' => YiluPHP::I()->lang('xxx_parameter_numeric_min_error', ['field' => $key]),
+            'numeric_max' => YiluPHP::I()->lang('xxx_parameter_numeric_max_error', ['field' => $key]),
+            'equal' => YiluPHP::I()->lang('xxx_parameter_equal_error', ['field' => $key]),
+            'rsa_encrypt' => YiluPHP::I()->lang('xxx_parameter_rsa_encrypt_error', ['field' => $key]),
         ];
         $default_error_key = $this->_get_default_error_key($rule, $rules);
 
@@ -134,7 +146,7 @@ class input
         else if (isset($default_msg[ $default_error_key ])){
             $msg = $default_msg[ $default_error_key ];
         }
-        $msg == '' && $msg = $app->lang('parameter_error_xxx', ['field' => $key]);
+        $msg == '' && $msg = YiluPHP::I()->lang('parameter_error_xxx', ['field' => $key]);
 
         $min = $max = $equal_param = '';
         foreach ($rules as $item){
@@ -429,7 +441,6 @@ class input
      */
     public function validate($rules, $error_message=[], $error_code=[])
     {
-        global $app;
         if(empty($rules) || !is_array($rules)){
             unset($rules, $error_message, $error_code);
             return [];
@@ -461,7 +472,7 @@ class input
                 if(empty($GLOBALS['config']['rsa_private_key'])){
                     return_code(
                         $this->_error_code($key, 'rsa_private_key', $rule_arr, $error_code),
-                        $app->lang('decryption_failed_no_private_key')
+                        YiluPHP::I()->lang('decryption_failed_no_private_key')
                     );
                 }
                 $private_key = $GLOBALS['config']['rsa_private_key'];
@@ -512,7 +523,7 @@ class input
                         }
                     }
                     else{
-                        return_code(CODE_PARAM_ERROR, $app->lang('unknown_validation_rule_for_parameter_xxx', ['field' => $key]).$item_rule );
+                        return_code(CODE_PARAM_ERROR, YiluPHP::I()->lang('unknown_validation_rule_for_parameter_xxx', ['field' => $key]).$item_rule );
                     }
                     unset($split_rule);
                 }

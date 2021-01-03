@@ -5,10 +5,10 @@
  * 这个命令中/usr/local/php7/bin/php是你的PHP安装位置
  * 这是你的文件存放位置：/data/web/www.yiluphp.com/
  * 这是传两个参数user_id和page过去，如果没有参数可以不写 "user_id=88&page=1"
- * OneWayPHP vision 1.0
+ * OneWayPHP vision 2.0
  * User: Jim.Wu
- * Date: 19/10/24
- * Time: 21:45
+ * Date: 2021.01.01
+ * Time: 11:19
  */
 
 if(!isset($_SERVER['REQUEST_URI'])){
@@ -22,7 +22,7 @@ $project_root = $project_root[0].DIRECTORY_SEPARATOR;
 include_once($project_root.'public'.DIRECTORY_SEPARATOR.'index.php');
 
 //接下来你可以像在controller里一样编程
-$user_id = $app->input->get_trim('user_id');
-$page = $app->input->get_int('page');
+$user_id = input::I()->get_trim('user_id');
+$page = input::I()->get_int('page');
 var_dump($user_id, $page);
 exit("\r\n完成\r\n\r\n");

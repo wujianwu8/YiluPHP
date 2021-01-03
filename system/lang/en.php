@@ -1,9 +1,9 @@
 <?php
 /**
- * YiluPHP vision 1.0
+ * YiluPHP vision 2.0
  * User: Wu Jianwu
  * Date: 2019/11/21
- * Time: 19:41
+ * Time: 11:19
  */
 return [
     'no_translation' => 'No translation.',
