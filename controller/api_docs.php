@@ -114,10 +114,10 @@ $first_api = null;
 $current_api = null;
 $version_list = [];
 
-$file_list1 = get_dir_and_file($project_root.'controller');
+$file_list1 = get_dir_and_file(APP_PATH.'controller');
 foreach ($file_list1 as $key1 => $item1){
     if (is_integer($key1)){
-        if ($data = parseApiAnnotation($project_root.'controller/'.$item1)){
+        if ($data = parseApiAnnotation(APP_PATH.'controller/'.$item1)){
             if ($version!='' && !in_array($version, $data['version'])){
                 continue;
             }
@@ -142,10 +142,10 @@ foreach ($file_list1 as $key1 => $item1){
         }
     }
     else{
-        $file_list2 = get_dir_and_file($project_root.'controller/'.$item1);
+        $file_list2 = get_dir_and_file(APP_PATH.'controller/'.$item1);
         foreach ($file_list2 as $key2 => $item2){
             if (is_integer($key2)){
-                if ($data = parseApiAnnotation($project_root.'controller/'.$item1.'/'.$item2)){
+                if ($data = parseApiAnnotation(APP_PATH.'controller/'.$item1.'/'.$item2)){
                     if ($version!='' && !in_array($version, $data['version'])){
                         continue;
                     }
@@ -170,10 +170,10 @@ foreach ($file_list1 as $key1 => $item1){
                 }
             }
             else{
-                $file_list3 = get_dir_and_file($project_root.'controller/'.$item1.'/'.$item2);
+                $file_list3 = get_dir_and_file(APP_PATH.'controller/'.$item1.'/'.$item2);
                 foreach ($file_list3 as $key3 => $item3){
                     if (is_integer($key3)){
-                        if ($data = parseApiAnnotation($project_root.'controller/'.$item1.'/'.$item2.'/'.$item3)){
+                        if ($data = parseApiAnnotation(APP_PATH.'controller/'.$item1.'/'.$item2.'/'.$item3)){
                             if ($version!='' && !in_array($version, $data['version'])){
                                 continue;
                             }

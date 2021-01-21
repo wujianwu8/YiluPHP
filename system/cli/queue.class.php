@@ -104,7 +104,7 @@ class queue{
                                 }
                                 continue;
                             }
-                            $file = $GLOBALS['project_root'].'cli/queue/'.$msg['class_name'].'.php';
+                            $file = APP_PATH.'cli/queue/'.$msg['class_name'].'.php';
                             $res = false;
                             if(!file_exists($file)){
                                 write_applog('ERROR', '未找到消息列表的实现文件:'.$file."\r\n");

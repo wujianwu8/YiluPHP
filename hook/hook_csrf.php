@@ -9,6 +9,24 @@
 
 class hook_csrf
 {
+    //存储单例
+    private static $_instance = null;
+
+    /**
+     * 获取单例
+     * @return input|null
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new self();
+        }
+        return static::$_instance;
+    }
+
+    public function run()
+    {
+    }
+
 	public function __construct()
 	{
 	}

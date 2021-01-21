@@ -9,10 +9,10 @@
 
 class model_demo extends model
 {
-    //存储单例
-    private static $_instance = null;
     //数据表名称
     protected $_table = 'table_name_demo';
+    //存储单例
+    private static $_instance = null;
 
     /**
      * 获取单例

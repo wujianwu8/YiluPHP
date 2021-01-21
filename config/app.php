@@ -30,10 +30,8 @@ define('TIME_30_SEC', 30); //30秒
 define('CODE_USER_NOT_LOGIN', -1);	//用户未登录的错误码
 
 class config{
-    public static $root='aa';
-    public static function get($key){
-
-    }
+    const root = 'aa';
+    const get = ['a'=>'aaa'];
 }
 
 /*
@@ -190,8 +188,8 @@ $config = [
      * 框架自带的公钥和密钥对为256位的，安全性很差，请自行生成更长的公钥和密钥对
      * document目录中有文件指导：生成RSA公钥和私钥的方法.txt
      * */
-    'rsa_private_key' => file_get_contents($project_root.'document/rsa_private_key.pem'),
-    'rsa_public_key' => file_get_contents($project_root.'document/rsa_public_key.pem'),
+    'rsa_private_key' => file_get_contents(APP_PATH.'document/rsa_private_key.pem'),
+    'rsa_public_key' => file_get_contents(APP_PATH.'document/rsa_public_key.pem'),
 
     /*
      * 访问接口文档的密码

@@ -17,9 +17,13 @@ if(!isset($_SERVER['REQUEST_URI'])){
     //获取命令行内容
     $_SERVER['REQUEST_URI'] = 'php '.$argv[0].' "'.implode('" "', $the_argv).'"';
 }
-$project_root = explode(DIRECTORY_SEPARATOR.'cli'.DIRECTORY_SEPARATOR, __FILE__);
-$project_root = $project_root[0].DIRECTORY_SEPARATOR;
-include_once($project_root.'public'.DIRECTORY_SEPARATOR.'index.php');
+if (!defined('APP_PATH')){
+    $project_root = explode(DIRECTORY_SEPARATOR.'cli'.DIRECTORY_SEPARATOR, __FILE__);
+    //项目的根目录，最后包含一个斜杠
+    define('APP_PATH', $project_root[0].DIRECTORY_SEPARATOR);
+    unset($project_root);
+}
+include_once(APP_PATH.'public'.DIRECTORY_SEPARATOR.'index.php');
 
 //接下来你可以像在controller里一样编程
 $user_id = input::I()->get_trim('user_id');

@@ -9,8 +9,11 @@
  * Time: 11:19
  */
 
-!isset($project_root) && $project_root = substr(dirname(__FILE__), 0, -6);
-$config = require($project_root.'config'.DIRECTORY_SEPARATOR.'app.php');
+if (!defined('APP_PATH')){
+    //项目的根目录，最后包含一个斜杠
+    define('APP_PATH', substr(dirname(__FILE__), 0, -6));
+}
+$config = require(APP_PATH.'config'.DIRECTORY_SEPARATOR.'app.php');
 //当前登录用户的基本信息
 $self_info = null;
 
@@ -21,7 +24,7 @@ if(isset($config['error_level']) && is_integer($config['error_level'])) {
 $Yilu_request_id = rand(1000,999999);
 //请求到达即写访问日志
 write_applog('VISIT');
-require($project_root.'functions.php');
+require(APP_PATH.'functions.php');
 
 //100-1000之内的错误码请留给YiluPHP官方使用
 define('CODE_SUCCESS', 0);	//操作成功无错误
@@ -103,7 +106,7 @@ function write_applog(string $level, string $data='')
     else {
         $txt = $datatime.$_SERVER['REQUEST_URI'].' , GET: '.json_encode($_GET,JSON_UNESCAPED_UNICODE).' POST: '.json_encode($_POST,JSON_UNESCAPED_UNICODE).' $_SERVER: '.json_encode($_SERVER,JSON_UNESCAPED_UNICODE).' , RESPONSE: '.$data;
     }
-    $path = $GLOBALS['project_root'].'logs/';
+    $path = APP_PATH.'logs/';
     if (!is_dir($path)) {
         mkdir($path, 0777, true);
     }
@@ -141,7 +144,7 @@ function add_to_queue($class_name, $data, $queue_name='default', $delay_second=0
 
     //如果是同步模式,则不写redis,直接运行队列文件
     if(!empty($GLOBALS['config']['queue_mode']) && $GLOBALS['config']['queue_mode']=='sync'){
-        $file = $GLOBALS['project_root'].'cli'.DIRECTORY_SEPARATOR.'queue'.DIRECTORY_SEPARATOR.$class_name.'.php';
+        $file = APP_PATH.'cli'.DIRECTORY_SEPARATOR.'queue'.DIRECTORY_SEPARATOR.$class_name.'.php';
         if(!file_exists($file)){
             write_applog('ERROR', '未找到消息列表的实现文件:'.$file);
             return_code(CODE_UNDEFINED_ERROR_TYPE,'未找到消息列表的实现文件:'.$file);
@@ -187,6 +190,7 @@ function throw404()
     //抛出404
     header('HTTP/1.1 404 Not Found');
     header("status: 404 Not Found");
+    YiluPHP::destroy();
     exit;
 }
 
@@ -219,7 +223,7 @@ function return_result($template, $data=[], $return_html=false)
         }
     }
 
-    $YiluPHP['file'] = $GLOBALS['project_root'].'template'.DIRECTORY_SEPARATOR.$YiluPHP['template_name'].'.php';
+    $YiluPHP['file'] = APP_PATH.'template'.DIRECTORY_SEPARATOR.$YiluPHP['template_name'].'.php';
     if(!file_exists($YiluPHP['file'])) {
         unset($YiluPHP['template_name'], $YiluPHP['return_html']);
         return_code(CODE_UNDEFINED_ERROR_TYPE,'模板不存在：' . $YiluPHP['file']);
@@ -232,7 +236,7 @@ function return_result($template, $data=[], $return_html=false)
     ob_start(); //打开缓冲区
     include($YiluPHP['file']);
     $YiluPHP['cache_string']=ob_get_contents();
-    ob_clean();
+    ob_end_clean();
 
     //解析模板中使用到的布局
     $YiluPHP['check_layout_status'] = preg_match_all('/<!--\{use_layout\s+(\S+)\}-->\s*/', $YiluPHP['cache_string'], $YiluPHP['matches'], PREG_SET_ORDER);
@@ -259,7 +263,7 @@ function return_result($template, $data=[], $return_html=false)
         }
         $YiluPHP['loop_time']++;
 
-        $YiluPHP['file'] = $GLOBALS['project_root'].'template/'.$YiluPHP['matches'][0][1].'.php';
+        $YiluPHP['file'] = APP_PATH.'template/'.$YiluPHP['matches'][0][1].'.php';
         if(!file_exists($YiluPHP['file'])) {
             unset($YiluPHP['template_name'], $YiluPHP['check_layout_status'], $YiluPHP['matches'], $YiluPHP['cache_string'], $YiluPHP['return_html']);
             return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('layout_file_not_exists') . '：' . $YiluPHP['file']);
@@ -268,7 +272,7 @@ function return_result($template, $data=[], $return_html=false)
         ob_start(); //打开缓冲区
         include($YiluPHP['file']);
         $YiluPHP['layout_cache_string']=ob_get_contents();
-        ob_clean();
+        ob_end_clean();
 
         //去除模板中的调用布局的代码
         $YiluPHP['cache_string'] = str_replace($YiluPHP['matches'][0][0], '', $YiluPHP['cache_string']);
@@ -301,8 +305,8 @@ function return_result($template, $data=[], $return_html=false)
             preg_match_all('/<!--#include.*?"(.*?)".*-->/',$YiluPHP['cache_string'],$matches);
             if($matches && count($matches)>=2){
                 foreach ($matches[1] as $key=>$match){
-                    if (file_exists($GLOBALS['project_root'].'static'.$match)){
-                        $tmp = file_get_contents($GLOBALS['project_root'].'static'.$match);
+                    if (file_exists(APP_PATH.'static'.$match)){
+                        $tmp = file_get_contents(APP_PATH.'static'.$match);
                         $YiluPHP['cache_string'] = str_replace($matches[0][$key], $tmp, $YiluPHP['cache_string']);
                     }
                 }
@@ -323,6 +327,7 @@ function return_result($template, $data=[], $return_html=false)
     echo $YiluPHP['cache_string'];
     unset($YiluPHP);
     after_controller();
+    YiluPHP::destroy();
     exit;
 }
 
@@ -413,6 +418,7 @@ function return_json($code, $msg='', $data=[])
     write_applog('RESPONSE', $res);
     echo $res;
     after_controller();
+    YiluPHP::destroy();
     unset($res);
     exit;
 }
@@ -453,6 +459,7 @@ function return_jsonp($code, $msg='', $data=[])
     write_applog('RESPONSE', $res);
     echo $res;
     after_controller();
+    YiluPHP::destroy();
     unset($res);
     exit;
 }
@@ -465,18 +472,15 @@ function after_controller()
 {
     if(!empty($GLOBALS['config']['after_controller']) && is_array($GLOBALS['config']['after_controller'])){
         foreach($GLOBALS['config']['after_controller'] as $class_name){
-            $class_name::I()->init();
+            $class_name::I()->run();
         }
     }
 }
-
 
 class YiluPHP
 {
     //存储单例
     private static $_instance;
-    //项目的根目录，最后包含一个斜杠
-    public static $project_root;
     public $helper = [];
     protected $lang = [];
     protected $page_lang = [];
@@ -493,16 +497,25 @@ class YiluPHP
         return static::$_instance;
     }
 
+    public static function destroy(){
+        static::$_instance = null;
+    }
+
     //防止使用clone克隆对象
     private function __clone(){}
 
     //防止使用new直接创建对象
     private function __construct()
     {
-        global $project_root;
-        static::$project_root = $project_root;
         $this->autoload_class = function ($class_name){
-            $file = $GLOBALS['project_root'].'helper'.DIRECTORY_SEPARATOR.$class_name.'.php';
+            global $config;
+            //查看是否有配置helper的目录
+            if (empty($config['helper_path'])) {
+                $file = APP_PATH . 'helper' . DIRECTORY_SEPARATOR . $class_name . '.php';
+            }
+            else{
+                $file = $config['helper_path'] . $class_name . '.php';
+            }
             if (file_exists($file)) {
                 //helper类文件的文件名、类名、app中的调用方法三者需要一致
                 require_once($file);
@@ -512,8 +525,14 @@ class YiluPHP
             //将驼峰式的名称用下划线分割
             $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $class_name);
             $path = explode('_', $path, 2);
-            $path = $path[0].DIRECTORY_SEPARATOR.$class_name;
-            $file = $GLOBALS['project_root'].$path.'.php';
+            //查看是否有配置相关的目录
+            if (empty($config[$path[0].'_path'])) {
+                $path = $path[0].DIRECTORY_SEPARATOR.$class_name;
+                $file = APP_PATH.$path.'.php';
+            }
+            else{
+                $file = $config[$path[0].'_path'] . $class_name . '.php';
+            }
             if (file_exists($file)) {
                 //类文件的文件名、类名、app中的调用方法三者需要一致
                 require_once($file);
@@ -523,7 +542,13 @@ class YiluPHP
             //支持给类取别名
             if(!empty($GLOBALS['config']['helper_alias']) && array_key_exists($class_name, $GLOBALS['config']['helper_alias']) ){
                 $real_class_name = $GLOBALS['config']['helper_alias'][$class_name];
-                $file = $GLOBALS['project_root'].'helper'.DIRECTORY_SEPARATOR.$real_class_name.'.php';
+                //查看是否有配置helper的目录
+                if (empty($config['helper_path'])) {
+                    $file = APP_PATH.'helper'.DIRECTORY_SEPARATOR.$real_class_name.'.php';
+                }
+                else{
+                    $file = $config['helper_path'] . $real_class_name . '.php';
+                }
                 if (file_exists($file)) {
                     require_once($file);
                     return $real_class_name;
@@ -532,8 +557,14 @@ class YiluPHP
                 //将驼峰式的名称用下划线分割
                 $path = preg_replace('/(?<=[a-z])([A-Z])/', '_$1', $real_class_name);
                 $path = explode('_', $path, 2);
-                $path = $path[0].DIRECTORY_SEPARATOR.$real_class_name;
-                $file = $GLOBALS['project_root'].$path.'.php';
+                //查看是否有配置相关的目录
+                if (empty($config[$path[0].'_path'])) {
+                    $path = $path[0].DIRECTORY_SEPARATOR.$real_class_name;
+                    $file = APP_PATH.$path.'.php';
+                }
+                else{
+                    $file = $config[$path[0].'_path'] . $real_class_name . '.php';
+                }
                 if (file_exists($file)) {
                     require_once($file);
                     return $real_class_name;
@@ -542,7 +573,6 @@ class YiluPHP
             return false;
         };
     }
-
 
     /**
      * 获取当前用户使用的语言
@@ -565,24 +595,23 @@ class YiluPHP
     public function lang($lang_key, $data=[])
     {
         $this->current_lang();
-        global $project_root;
         $res = $lang_key;
         if(!$this->lang){
             //载入OnoWayPHP系统语言包
-            $file = $project_root.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
+            $file = APP_PATH.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
             if(file_exists($file)){
                 $this->lang = require_once($file);
             }
             else{
-                $this->lang = require_once($project_root.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'cn.php');
+                $this->lang = require_once(APP_PATH.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'cn.php');
             }
             //载入用户的语言包
-            $file = $project_root.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
+            $file = APP_PATH.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
             if(file_exists($file)){
                 $this->lang = array_merge(require_once($file), $this->lang);
             }
-            else if(file_exists($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php')){
-                $this->lang = array_merge(require_once($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php'), $this->lang);
+            else if(file_exists(APP_PATH.'lang'.DIRECTORY_SEPARATOR.'cn.php')){
+                $this->lang = array_merge(require_once(APP_PATH.'lang'.DIRECTORY_SEPARATOR.'cn.php'), $this->lang);
             }
             else{
                 return_code(CODE_UNDEFINED_ERROR_TYPE,YiluPHP::I()->lang('no_translation_file'). '：'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php');
@@ -590,8 +619,8 @@ class YiluPHP
         }
         if(!isset($this->lang[$lang_key])){
             //如果指定的翻译没有，则尝试使用中文的
-            if( $GLOBALS['config']['lang']!=='cn' && file_exists($project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php')){
-                $lang = require $project_root.'lang'.DIRECTORY_SEPARATOR.'cn.php';
+            if( $GLOBALS['config']['lang']!=='cn' && file_exists(APP_PATH.'lang'.DIRECTORY_SEPARATOR.'cn.php')){
+                $lang = require APP_PATH.'lang'.DIRECTORY_SEPARATOR.'cn.php';
                 if(isset($lang[$lang_key])){
                     $res = $lang[$lang_key];
                 }
@@ -649,7 +678,7 @@ class YiluPHP
      */
     public function load_page_lang($lang_file)
     {
-        $file = $GLOBALS['project_root'].'lang'.DIRECTORY_SEPARATOR.$lang_file.'.php';
+        $file = APP_PATH.'lang'.DIRECTORY_SEPARATOR.$lang_file.'.php';
         if(file_exists($file)){
             $this->page_lang = array_merge(require_once($file), $this->page_lang);
         }
@@ -713,6 +742,11 @@ class YiluPHP
         }
     }
 }
+
+/**
+ * 类的自动加载
+ **/
+spl_autoload_register(YiluPHP::I()->autoload_class);
 
 if(!empty($config['use_session'])) {
     /**
@@ -866,11 +900,6 @@ function find_file_in_dir($path, $filename){
     }
 }
 
-/**
- * 类的自动加载
-**/
-spl_autoload_register(YiluPHP::I()->autoload_class);
-
 if(PHP_SAPI=='cli'){
     //解析参数，传参数方式：在php文件名的加空格 再加用双引号包含的querystring格式的参数，例如：
     //php like_post.php "aa=aaaaa&bb=bbbbb"
@@ -893,7 +922,7 @@ else{
     //例如防csrf攻击、验证访问权限等等，可在配置文件中配置多个类，每个类必须包含run方法，因为从此方法开始执行
     if(!empty($config['before_controller']) && is_array($config['before_controller'])){
         foreach($config['before_controller'] as $class_name){
-            YiluPHP::I()->$class_name;
+            $class_name::I()->run();
         }
     }
 
@@ -944,7 +973,7 @@ else{
     else{
         $request_uri = explode('/', strtolower($request_uri));
     }
-    $file = $project_root.'controller/';
+    $file = APP_PATH.'controller/';
     $index = 0;
     $is_find_file = false;
     foreach($request_uri as $key => $val){
@@ -974,6 +1003,7 @@ else{
             }
         }
     }
+
     if(!$is_find_file){
         throw404();
     }
