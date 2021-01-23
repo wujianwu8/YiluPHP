@@ -7,7 +7,7 @@
  * Date: 2021.01.01
  * Time: 11:19
  */
-class hook_header_setter
+class hook_header_setter extends hook
 {
     //存储单例
     private static $_instance = null;

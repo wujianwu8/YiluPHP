@@ -11,10 +11,10 @@
  * delete：删除当前队列,不会有新的消息加入执行,正在执行的消息将继续执行完毕
  * start：恢复当前队列,继续处理消息
  * 使用redis列表实现
- * YiluPHP vision 2.0
+ * YiluPHP vision 1.0
  * User: Jim.Wu
- * Date: 2021.01.01
- * Time: 11:19
+ * Date: 19/12/24
+ * Time: 18:45
  */
 if(!isset($_SERVER['REQUEST_URI'])){
     $the_argv = $argv;
@@ -26,7 +26,7 @@ if (!defined('APP_PATH')){
     define('APP_PATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
 }
 include_once(APP_PATH.'public'.DIRECTORY_SEPARATOR.'index.php');
-include_once(APP_PATH.'system'.DIRECTORY_SEPARATOR.'cli'.DIRECTORY_SEPARATOR.'queue.class.php');
+include_once(SYSTEM_PATH.'cli'.DIRECTORY_SEPARATOR.'queue.class.php');
 
 $queue_name = isset($_GET['queue_name'])?trim($_GET['queue_name']):null;
 if(!$queue_name){

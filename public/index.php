@@ -17,6 +17,17 @@ $config = require(APP_PATH.'config'.DIRECTORY_SEPARATOR.'app.php');
 //当前登录用户的基本信息
 $self_info = null;
 
+if (!defined('SYSTEM_PATH')) {
+    if (empty($config['system_path'])) {
+        $system_path = APP_PATH . 'system' . DIRECTORY_SEPARATOR;
+    }
+    else {
+        $system_path = $config['system_path'];
+    }
+    define('SYSTEM_PATH', $system_path);
+    unset($system_path);
+}
+
 if(isset($config['error_level']) && is_integer($config['error_level'])) {
     error_reporting($config['error_level']);
 }
@@ -509,6 +520,14 @@ class YiluPHP
     {
         $this->autoload_class = function ($class_name){
             global $config;
+            //先检查系统目录中有没有
+            $file = SYSTEM_PATH . 'helper' . DIRECTORY_SEPARATOR . $class_name . '.php';
+            if (file_exists($file)) {
+                //helper类文件的文件名、类名两者需要一致
+                require_once($file);
+                return $class_name;
+            }
+
             //查看是否有配置helper的目录
             if (empty($config['helper_path'])) {
                 $file = APP_PATH . 'helper' . DIRECTORY_SEPARATOR . $class_name . '.php';
@@ -517,7 +536,7 @@ class YiluPHP
                 $file = $config['helper_path'] . $class_name . '.php';
             }
             if (file_exists($file)) {
-                //helper类文件的文件名、类名、app中的调用方法三者需要一致
+                //helper类文件的文件名、类名两者需要一致
                 require_once($file);
                 return $class_name;
             }
@@ -534,7 +553,7 @@ class YiluPHP
                 $file = $config[$path[0].'_path'] . $class_name . '.php';
             }
             if (file_exists($file)) {
-                //类文件的文件名、类名、app中的调用方法三者需要一致
+                //类文件的文件名、类名两者需要一致
                 require_once($file);
                 return $class_name;
             }
@@ -597,13 +616,13 @@ class YiluPHP
         $this->current_lang();
         $res = $lang_key;
         if(!$this->lang){
-            //载入OnoWayPHP系统语言包
-            $file = APP_PATH.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
+            //载入YiluPHP系统语言包
+            $file = SYSTEM_PATH.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';
             if(file_exists($file)){
                 $this->lang = require_once($file);
             }
             else{
-                $this->lang = require_once(APP_PATH.'system'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'cn.php');
+                $this->lang = require_once(SYSTEM_PATH.'lang'.DIRECTORY_SEPARATOR.'cn.php');
             }
             //载入用户的语言包
             $file = APP_PATH.'lang'.DIRECTORY_SEPARATOR.$GLOBALS['config']['lang'].'.php';

@@ -7,7 +7,7 @@
  * Time: 11:19
  */
 
-class hook_csrf
+class hook_csrf extends hook
 {
     //存储单例
     private static $_instance = null;
