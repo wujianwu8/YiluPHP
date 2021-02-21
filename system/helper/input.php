@@ -7,8 +7,8 @@
  * Time: 20:33
  */
 
-if(file_exists('input_extend.php')){
-    include_once 'input_extend.php';
+if(file_exists(APP_PATH.'helper/input_extend.php')){
+    include_once APP_PATH.'helper/input_extend.php';
 }
 if(!trait_exists('input_extend')){
     trait input_extend{}
@@ -440,9 +440,9 @@ class input extends base_class
             $rule_arr = explode('|', $rule);
             //检查是否为必须的参数
             if (in_array('required', $rule_arr) && !isset($_REQUEST[$key])){
-                return_code(
-                    $this->_error_code($key, 'required', $rule_arr, $error_code),
-                    $this->_error_msg($key, 'required', $rule_arr, $error_message)
+                throw new validate_exception(
+                    $this->_error_msg($key, 'required', $rule_arr, $error_message),
+                    $this->_error_code($key, 'required', $rule_arr, $error_code)
                 );
             }
             $val = $this->request($key);
@@ -457,9 +457,9 @@ class input extends base_class
             //如果需要RSA解密,则先解密
             if (in_array('rsa_encrypt', $rule_arr)){
                 if(empty($GLOBALS['config']['rsa_private_key'])){
-                    return_code(
-                        $this->_error_code($key, 'rsa_private_key', $rule_arr, $error_code),
-                        YiluPHP::I()->lang('decryption_failed_no_private_key')
+                    throw new validate_exception(
+                        YiluPHP::I()->lang('decryption_failed_no_private_key'),
+                        $this->_error_code($key, 'rsa_private_key', $rule_arr, $error_code)
                     );
                 }
                 $private_key = $GLOBALS['config']['rsa_private_key'];
@@ -468,9 +468,9 @@ class input extends base_class
 
                 //rsa解密
                 if(!openssl_private_decrypt(base64_decode($val), $tmp, $private_key)){
-                    return_code(
-                        $this->_error_code($key, 'rsa_private_key', $rule_arr, $error_code),
-                        $this->_error_msg($key, 'rsa_private_key', $rule_arr, $error_message)
+                    throw new validate_exception(
+                        $this->_error_msg($key, 'rsa_private_key', $rule_arr, $error_message),
+                        $this->_error_code($key, 'rsa_private_key', $rule_arr, $error_code)
                     );
                 }
                 $val = $tmp;
@@ -490,9 +490,9 @@ class input extends base_class
                         $method = '_check_'.$split_rule[0];
                         if(!$this->$method($key, $val, $rule_arr, $error_message)){
                             if (!(!in_array('required', $rule_arr) && $val===null)) {
-                                return_code(
-                                    $this->_error_code($key, $split_rule[0], $rule_arr, $error_code),
-                                    $this->_error_msg($key, $split_rule[0], $rule_arr, $error_message)
+                                throw new validate_exception(
+                                    $this->_error_msg($key, $split_rule[0], $rule_arr, $error_message),
+                                    $this->_error_code($key, $split_rule[0], $rule_arr, $error_code)
                                 );
                             }
                         }
@@ -502,15 +502,18 @@ class input extends base_class
                         //自定义的校验函数，如果校验通过则返回true，否则返回大于零的错误码
                         if(!$item_rule($key, $val, $rule_arr, $error_message)){
                             if (!(!in_array('required', $rule_arr) && $val===null)) {
-                                return_code(
-                                    $this->_error_code($key, $split_rule[0], $rule_arr, $error_code),
-                                    $this->_error_msg($key, $split_rule[0], $rule_arr, $error_message)
+                                throw new validate_exception(
+                                    $this->_error_msg($key, $split_rule[0], $rule_arr, $error_message),
+                                    $this->_error_code($key, $split_rule[0], $rule_arr, $error_code)
                                 );
                             }
                         }
                     }
                     else{
-                        return_code(CODE_PARAM_ERROR, YiluPHP::I()->lang('unknown_validation_rule_for_parameter_xxx', ['field' => $key]).$item_rule );
+                        throw new validate_exception(
+                            YiluPHP::I()->lang('unknown_validation_rule_for_parameter_xxx', ['field' => $key]).$item_rule,
+                            CODE_PARAM_ERROR
+                        );
                     }
                     unset($split_rule);
                 }

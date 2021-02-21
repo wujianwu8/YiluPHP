@@ -81,7 +81,7 @@ if (!empty($config['visit_api_docs_password'])){
     }
 }
 else if (!in_array(env(), ['dev', 'local'])){
-    return_code(CODE_NO_AUTHORIZED,'Can\'t visited in '.env().' environment');
+    return code(CODE_NO_AUTHORIZED,'Can\'t visited in '.env().' environment');
 }
 
 $menu_list = [
@@ -207,7 +207,7 @@ if (!$current_api){
 }
 
 //模板文件存放在 /template/api_docs.php
-return_result('api_docs', [
+return result('api_docs', [
     //非必须的参数如果没有则不会返回此字段
     'version' => $version,
     'version_list' => $version_list,

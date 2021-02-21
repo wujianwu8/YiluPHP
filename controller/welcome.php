@@ -29,11 +29,11 @@ $params = input::I()->validate(
     ]);
 $title = input::I()->get_trim('title');
 if (mb_strlen($title)>3){
-    return_code(2, YiluPHP::I()->lang('title_too_long'));
+    return code(2, YiluPHP::I()->lang('title_too_long'));
 }
 
 //模板文件存放在 /template/welcome.php
-return_result('welcome', [
+return result('welcome', [
     //非必须的参数如果没有则不会返回此字段
     'article_id' => isset($params['article_id']) ? $params['article_id']:'',
     'mobile' => isset($params['mobile']) ? $params['mobile']:'',

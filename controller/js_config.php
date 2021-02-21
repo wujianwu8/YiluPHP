@@ -2,4 +2,4 @@
 /*
  * 输出配置信息到JS文件
  */
-return_result('js_config');
+return result('js_config');
