@@ -5,7 +5,7 @@
  * 这个命令中/usr/local/php7/bin/php是你的PHP安装位置
  * 这是你的文件存放位置：/data/web/www.yiluphp.com/
  * 这是传两个参数user_id和page过去，如果没有参数可以不写 "user_id=88&page=1"
- * OneWayPHP vision 2.0
+ * YiluPHP vision 2.0
  * User: Jim.Wu
  * Date: 2021.01.01
  * Time: 11:19
