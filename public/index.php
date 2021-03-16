@@ -236,7 +236,7 @@ function result($template, $data=[], $return_html=false)
     unset($YiluPHP['data']);
     foreach ($GLOBALS as $YiluPHP_key=>$YiluPHP_value){
         if (isset($$YiluPHP_key)){
-            throw new validate_exception('全局变量 $'.$YiluPHP_key.' 被重新赋值了，请更换变量名',CODE_PARAM_ERROR);
+            throw new validate_exception('在输出模板时传递的变量与全局变量 $'.$YiluPHP_key.' 重名了，如果此全局变量是你声明的，你不传此变量也可以在模板中使用，如果输出模板时你一定要传此值，请换一个变量名。（做此限制是为了防止存在同名参数时，模板函数接收的参数无效的问题）',CODE_PARAM_ERROR);
         }
     }
     extract($GLOBALS);
