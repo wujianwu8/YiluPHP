@@ -10,6 +10,7 @@
 date_default_timezone_set('Asia/Shanghai');
 
 define('REDIS_LOGIN_USER_INFO', 'REDIS_LOGIN_USER_INFO_');   //登录用户的信息，后面接cookie vk 的值
+define('REDIS_SUB_TABLE', 'REDIS_SUB_TABLE_');   //当前使用的分表的名称
 
 define('TIME_10_YEAR', 315360000); //10年的秒数
 define('TIME_5_YEAR', 157680000); //5年的秒数

@@ -18,7 +18,7 @@ if (!isset($argv[1]) || trim($argv[1])==''){
     exit("缺少命令名，即命令的文件名。\r\n正确格式：php yilu 命令名 \"query string形式的参数\"\r\n\r\n");
 }
 $commend = trim($argv[1]);
-if(strtolower($commend)=='swoole'){
+if(in_array(strtolower($commend), ['create_sub_table'])){
     $file = SYSTEM_PATH.'cli'.DIRECTORY_SEPARATOR.$commend.'.php';
 }
 else{

@@ -234,6 +234,11 @@ function result($template, $data=[], $return_html=false)
     //取出数据
     extract($YiluPHP['data']);
     unset($YiluPHP['data']);
+    foreach ($GLOBALS as $YiluPHP_key=>$YiluPHP_value){
+        if (isset($$YiluPHP_key)){
+            throw new validate_exception('全局变量 $'.$YiluPHP_key.' 被重新赋值了，请更换变量名',CODE_PARAM_ERROR);
+        }
+    }
     extract($GLOBALS);
 
     ob_start(); //打开缓冲区
@@ -497,7 +502,6 @@ class YiluPHP
     protected $page_lang = [];
     public $autoload_class = null;
     public static $file_content=[]; //装载文件内容
-    public static $swoole_data=[]; //装载返回给swoole的数据
 
     /**
      * 获取单例
