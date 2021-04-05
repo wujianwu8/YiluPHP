@@ -559,7 +559,7 @@ class model
         unset($table_name, $connection, $field_value);
         $keys = array_keys($data);
         foreach($tables as $item) {
-            $sql = 'INSERT INTO ' . $item['table_name'] . ' (`' . implode('`, `', $keys) . '`) VALUES (:' . implode(', :', $keys) . ')';
+            $sql = 'INSERT INTO `' . $item['table_name'] . '` (`' . implode('`, `', $keys) . '`) VALUES (:' . implode(', :', $keys) . ')';
             try {
                 $stmt = mysql::I($item['connection'])->prepare($sql);
                 foreach ($data as $key => $value) {
@@ -632,7 +632,7 @@ class model
         }
         $where = array_merge($where, $extend_params);
         foreach($tables as $item) {
-            $sql = 'UPDATE ' . $item['table_name'] . ' SET ' . implode(',', $set) . ' WHERE ' . implode(' AND ', $where_sql) . $extend_sql;
+            $sql = 'UPDATE `' . $item['table_name'] . '` SET ' . implode(',', $set) . ' WHERE ' . implode(' AND ', $where_sql) . $extend_sql;
             try {
                 $stmt = mysql::I($item['connection'])->prepare($sql);
                 foreach ($data as $key => $value) {
@@ -735,7 +735,7 @@ class model
         $count = 0;
         foreach($tables as $item) {
             try {
-                $stmt = mysql::I($item['connection'])->prepare('DELETE FROM ' . $item['table_name'].$sql);
+                $stmt = mysql::I($item['connection'])->prepare('DELETE FROM `' . $item['table_name'].'` '.$sql);
                 foreach ($where as $key => $value) {
                     $direct_assign = true;
                     if(is_array($value)){
@@ -833,7 +833,7 @@ class model
         $count = 0;
         foreach($tables as $item) {
             try {
-                $stmt = mysql::I($item['connection'])->prepare('DELETE FROM ' . $item['table_name'].$sql);
+                $stmt = mysql::I($item['connection'])->prepare('DELETE FROM `' . $item['table_name'].'` '.$sql);
                 foreach ($where as $key => $value) {
                     $direct_assign = true;
                     if(is_array($value)){
