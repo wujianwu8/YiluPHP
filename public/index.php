@@ -652,7 +652,7 @@ class YiluPHP
             }
             else{
                 $res = $lang_key;
-                write_applog('ERROR', YiluPHP::I()->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
+                write_applog('NOTICE', YiluPHP::I()->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key);
 //                throw new validate_exception(YiluPHP::I()->lang('no_translation'). '('.$GLOBALS['config']['lang'].')：'.$lang_key,CODE_UNDEFINED_ERROR_TYPE);
             }
         }
@@ -1065,6 +1065,7 @@ else{
         }
     }
     catch (Exception $exception){
+        write_applog('ERROR', $exception->getMessage().'['.$exception->getCode().']');
         $msg = YiluPHP::I()->lang('inner_error');
         echo code(CODE_SYSTEM_ERR, $msg);
         unset($msg);
