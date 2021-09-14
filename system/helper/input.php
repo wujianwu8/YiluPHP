@@ -537,7 +537,7 @@ class input extends base_class
     public function get_trim($key, $default=null)
     {
         $val = isset($_GET[$key]) ? trim($_GET[$key]) : null;
-        if(($val===null || $val==='') && $default!==null && $default!==''){
+        if($val===null){
             return $default;
         }
         return $val;
@@ -553,7 +553,7 @@ class input extends base_class
     public function post_trim($key, $default=null)
     {
         $val = isset($_POST[$key]) ? trim($_POST[$key]) : null;
-        if(($val===null || $val==='') && $default!==null && $default!==''){
+        if($val===null){
             return $default;
         }
         return $val;
@@ -569,7 +569,7 @@ class input extends base_class
     public function request_trim($key, $default=null)
     {
         $val = isset($_REQUEST[$key]) ? trim($_REQUEST[$key]) : null;
-        if(($val===null || $val==='') && $default!==null && $default!==''){
+        if($val===null){
             return $default;
         }
         return $val;
@@ -585,7 +585,7 @@ class input extends base_class
     public function get($key, $default=null)
     {
         $val = isset($_GET[$key]) ? $_GET[$key] : null;
-        if(($val===null || $val==='') && $default!==null && $default!==''){
+        if($val===null){
             return $default;
         }
         return $val;
@@ -601,7 +601,7 @@ class input extends base_class
     public function post($key, $default=null)
     {
         $val = isset($_POST[$key]) ? $_POST[$key] : null;
-        if(($val===null || $val==='') && $default!==null && $default!==''){
+        if($val===null){
             return $default;
         }
         return $val;
@@ -617,7 +617,7 @@ class input extends base_class
     public function request($key, $default=null)
     {
         $val = isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
-        if(($val===null || $val==='') && $default!==null && $default!==''){
+        if($val===null){
             return $default;
         }
         return $val;
@@ -633,7 +633,7 @@ class input extends base_class
     public function get_int($key, $default=null)
     {
         $val = isset($_GET[$key]) ? $_GET[$key] : null;
-        if($val===null || $val===''){
+        if($val===null){
             return $default;
         }
         return intval($val);
@@ -649,7 +649,7 @@ class input extends base_class
     public function post_int($key, $default=null)
     {
         $val = isset($_POST[$key]) ? $_POST[$key] : null;
-        if($val===null || $val===''){
+        if($val===null){
             return $default;
         }
         return intval($val);
@@ -665,7 +665,7 @@ class input extends base_class
     public function request_int($key, $default=null)
     {
         $val = isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
-        if($val===null || $val===''){
+        if($val===null){
             return $default;
         }
         return intval($val);

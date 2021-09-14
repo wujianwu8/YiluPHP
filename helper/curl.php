@@ -3,8 +3,8 @@
  * CURL方法类
  * YiluPHP vision 2.0
  * User: Jim.Wu
- * Date: 2021.01.01
- * Time: 11:19
+ * Date: 2021/01/21
+ * Time: 22:55
  */
 
 class curl
@@ -28,6 +28,20 @@ class curl
         CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_0,
         CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:5.0) Gecko/20110619 Firefox/5.0'
     );
+
+    //存储单例
+    private static $_instance = null;
+
+    /**
+     * 获取单例
+     * @return model|null 返回单例
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new self();
+        }
+        return static::$_instance;
+    }
 
     public function init()
     {
@@ -79,8 +93,12 @@ class curl
         if (is_null($this->_ch)) {
             $this->init();
         }
+        if (is_array($data)){
+            $data = http_build_query($data);
+        }
         $this->setOption(CURLOPT_POST, true);
-        $this->setOption(CURLOPT_POSTFIELDS, http_build_query($data));
+        $this->setOption(CURLOPT_POSTFIELDS, $data);
+        $this->setHeaders(['Content-Type:application/json']);
 
         $response = $this->exec($url);
         $this->close();

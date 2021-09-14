@@ -805,6 +805,12 @@ class model
                 'connection' => $connection,
             ];
         }
+        if (!$tables){
+            $tables[] = [
+                'table_name' => $this->_table,
+                'connection' => $this->_connection,
+            ];
+        }
         unset($table_name, $connection, $field_value);
 
         $where_sql = [];
