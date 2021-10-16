@@ -14,9 +14,26 @@ if(!trait_exists('input_extend')){
     trait input_extend{}
 }
 
-class input extends base_class
+class input
 {
     use input_extend;
+    //存储所有类的单例
+    protected static $instances = [];
+
+    /**
+     * 获取单例
+     * @return model|null 返回单例
+     */
+    public static function I(){
+        $class_name = get_called_class();
+        if (empty($class_name) && empty(self::$instances[$class_name])){
+            return static::$instances[$class_name] = new self();
+        }
+        if (empty(static::$instances[$class_name])){
+            return static::$instances[$class_name] = new $class_name();
+        }
+        return static::$instances[$class_name];
+    }
 
     protected $_default_error_code = [
         'required' => CODE_REQUIRED_PARAM_ERROR,
