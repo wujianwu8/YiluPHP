@@ -3,7 +3,7 @@
  * YiluPHP vision 2.0
  * User: Wu Jianwu
  * Date: 2019/11/21
- * Time: 11:19
+ * Time: 21:41
  */
 return [
     'no_translation' => '未翻译',

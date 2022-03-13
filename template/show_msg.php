@@ -5,18 +5,9 @@
     <?php if($err_code===-1): ?>
         <script>
             console.log("<?php echo htmlspecialchars($msg); ?>");
-            document.location.href = "<?php echo !empty($config['user_center']['host'])?$config['user_center']['host']:''; ?>/?redirect_uri="+encodeURIComponent(document.location.href);
+            document.location.href = "<?php echo !empty($config['user_center']['host'])?$config['user_center']['host']:''; ?><?php echo url_pre_lang(); ?>/?redirect_uri="+encodeURIComponent(document.location.href);
         </script>
     <?php endif; ?>
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?802be9112dbcdf29bc10f0eabed49dca";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
 </head>
 <body>
 

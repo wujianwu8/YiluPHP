@@ -510,6 +510,7 @@ class YiluPHP
     protected $page_lang = [];
     public $autoload_class = null;
     public static $file_content=[]; //装载文件内容
+    public static $support_lang=[];
 
     /**
      * 获取单例
@@ -718,6 +719,74 @@ class YiluPHP
         else{
             throw new validate_exception(YiluPHP::I()->lang('file_not_exists'). '：'.$file,CODE_UNDEFINED_ERROR_TYPE);
         }
+    }
+
+    /**
+     * 获取当前系统支持的所有语言
+     * 即获取所有语言包文件的文件名，全部转为小写
+     * @return array
+     */
+    public function support_lang()
+    {
+        if (!empty(static::$support_lang)){
+            return static::$support_lang;
+        }
+
+        if((empty($GLOBALS['config']['env']) || in_array($GLOBALS['config']['env'], ['dev', 'beta']))
+            && $lang = redis_y::I()->hGetAll('yiluphp_support_lang_list')){
+            if (!empty($lang)){
+                return $lang;
+            }
+        }
+
+        $lang = [];
+        $dir = APP_PATH.'lang'.DIRECTORY_SEPARATOR;
+        if (is_dir($dir)){
+            $filename = scandir($dir);
+            foreach($filename as $v){
+                if($v=='.' || $v=='..'){
+                    continue;
+                }
+                $lang[] = basename(strtolower($v), '.php');
+            }
+        }
+        //框架目录中的语言包
+        $dir = SYSTEM_PATH.'lang'.DIRECTORY_SEPARATOR;
+        $filename = scandir($dir);
+        foreach($filename as $v){
+            if($v=='.' || $v=='..'){
+                continue;
+            }
+            $name = basename(strtolower($v), '.php');
+            if (!in_array($name, $lang)){
+                $lang[] = $name;
+            }
+        }
+        static::$support_lang = $lang;
+
+        if($lang && empty($GLOBALS['config']['env']) || in_array($GLOBALS['config']['env'], ['dev', 'beta'])){
+            redis_y::I()->hMSet('yiluphp_support_lang_list', $lang);
+            redis_y::I()->expire('yiluphp_support_lang_list', 10);
+        }
+        return $lang;
+    }
+
+    /**
+     * 获取当前链接地址中带的语言标识
+     * @return string
+     */
+    public function uri_lang()
+    {
+        $uri_lang = '';
+        $tmp = explode('/', $_SERVER['REQUEST_URI'],3);
+        if (isset($tmp[1]) && trim($tmp[1])!==''){
+            $tmp = trim(strtolower($tmp[1]));
+            if (in_array($tmp, $this->support_lang())){
+                $uri_lang = $tmp;
+            }
+        }
+        unset($tmp);
+        return $uri_lang;
     }
 
     /**
@@ -932,13 +1001,53 @@ function find_file_in_dir($path, $filename){
     }
 }
 
+/**
+ * url的语言前缀标识，用于生成URL
+ * @desc
+ * @return string
+ */
+function url_pre_lang(){
+    global $config;
+    return $config['main_lang']==$config['lang']?'':'/'.$config['lang'];
+}
+
+if (empty($config['main_lang']) && !empty($config['lang'] )){
+    //设置主语言，主语言时url可以不带语言标识
+    $config['main_lang'] = $config['lang'];
+}
+
+//检查url中是不是带有语言标识，第一层目录可以设置成语言
+$uri_lang = YiluPHP::I()->uri_lang();
+
 //设置需要使用的语言
-if(isset($_REQUEST['lang']) && trim($_REQUEST['lang'])!='' ){
+if ($uri_lang!==''){
+    $config['lang'] = $uri_lang;
+}
+else if(isset($_REQUEST['lang']) && trim($_REQUEST['lang'])!='' ){
     $config['lang'] = strtolower(trim($_REQUEST['lang']));
-    setcookie('lang', $config['lang'], 0, '/', empty($config['root_domain'])?'':$config['root_domain']);
 }
 else if(isset($_COOKIE['lang']) && trim($_COOKIE['lang'])!='' ){
-    $config['lang'] = strtolower($_COOKIE['lang']);
+    $config['lang'] = trim(strtolower($_COOKIE['lang']));
+    //跳转到所属语言的url上去
+//    $cookie_lang = trim(strtolower($_COOKIE['lang']));
+//    if ($uri_lang!=$cookie_lang){
+//        if (!($uri_lang==='' && $config['lang'] == $cookie_lang)){
+//            $tmp = explode('/', $_SERVER['REQUEST_URI'],3);
+//            if (empty($tmp[1]) || !in_array(strtolower(trim($tmp[1])), YiluPHP::I()->support_lang())){
+//                $url = implode('/', $tmp);
+//                $url = trim($url,'/');
+//                $url = '/'.$cookie_lang.'/'.$url;
+//            }
+//            else{
+//                $tmp[1] = $cookie_lang;
+//                $url = implode('/', $tmp);
+//                $url = trim($url,'/');
+//                $url = '/'.$url;
+//            }
+//            header('Location: ' . $url);
+//            exit();
+//        }
+//    }
 }
 
 //用户跟踪请求和返回的日志,id一样即同一次请求写的日志
@@ -980,6 +1089,15 @@ else{
         }
         else {
             $request_uri = $_SERVER['REQUEST_URI'];
+        }
+
+        //去除url中的语言标识
+        $tmp = explode('/', $request_uri,3);
+        if (!empty($tmp[1]) && in_array(strtolower(trim($tmp[1])), YiluPHP::I()->support_lang())){
+            $request_uri = substr($request_uri, strlen($tmp[1])+1);
+        }
+        if ($request_uri===''){
+            $request_uri = '/';
         }
 
         $url = explode('?', $request_uri);

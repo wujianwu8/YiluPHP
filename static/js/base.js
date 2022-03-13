@@ -1,4 +1,17 @@
-/*
+/**
+ * 获取当前url中的host，带有http(s)
+ * @returns {string}
+ */
+function getCurrentHost()
+{
+    var url = document.location.href;
+    var arrUrl = url.split("//");
+    var start = arrUrl[1].indexOf("/");
+    var host = arrUrl[1].substring(0,start);
+    return arrUrl[0]+"//"+host;
+}
+
+/**
  * 使用RSA方法加密某个对象中的指定值
  * @param object objData 包含键值对的对象
  * @param array field 需要加密的键名
@@ -16,7 +29,7 @@ function rsaEncryptData(objData, field){
     return objData;
 }
 
-/*
+/**
  * 切换当前系统语言
  * @param string lang 语言的编码，如cn为中文，en为英文，其它开发者可定义
  * @return 跳转页面
@@ -27,22 +40,34 @@ function changeLanguage(lang)
         return false;
     }
     url = document.location.href;
-    tmp = url.split("#");
-    tmp2 = tmp[0].split("?");
-    args = getUrlParms();
-    args.lang = lang;
-    params = [];
-    for (var i in args){
-        params.push(i+"="+args[i]);
+    tmp = url.split(getCurrentHost());
+    tmp = tmp[1].split('/');
+    arr = [getCurrentHost()];
+    var num = 0;
+    $.each(tmp, function (i,v){
+        v = $.trim(v);
+        if (v!=""){
+            num++;
+            if (num==1){
+                if (lang!=main_lang) {
+                    arr.push(lang);
+                }
+                if ($.inArray(v, support_lang)<0) {
+                    arr.push(v);
+                }
+            }
+            else {
+                arr.push(v);
+            }
+        }
+    });
+    if (arr.length==1 && $.inArray(lang, support_lang)>=0 && lang!=main_lang){
+        arr.push(lang);
     }
-    url = tmp2[0] + "?" + params.join("&");
-    if (tmp.length>1){
-        url += "#"+tmp[1];
-    }
-    document.location.href = url;
+    document.location.href =  arr.join('/');
 }
 
-/*
+/**
  * 根据语言键名和参数返回当前语言类型下的翻译文本
  * @param string key 语言键名
  * @param object param 翻译里的变量参数及值，如果没有可以不传此参数

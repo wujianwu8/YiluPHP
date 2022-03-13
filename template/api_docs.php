@@ -289,7 +289,7 @@
     <div class="container">
         <div>
             Technical support:
-            <a target="_blank" href="https://www.yiluphp.com/">www.yiluphp.com</a>
+            <a target="_blank" href="https://www.yiluphp.com<?php echo url_pre_lang(); ?>/">www.yiluphp.com</a>
         </div>
     </div>
 </footer>

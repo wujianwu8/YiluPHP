@@ -10,7 +10,7 @@ $head_info = [
 <p><?php echo YiluPHP::I()->lang('current_environment').env(); ?></p>
 <p>
     <?php echo YiluPHP::I()->lang('official_website'); ?>
-    <a href="http://www.YiluPHP.com">www.YiluPHP.com</a>
+    <a href="http://www.YiluPHP.com<?php echo url_pre_lang(); ?>">www.YiluPHP.com</a>
 </p>
 
 <hr>
@@ -19,23 +19,23 @@ $head_info = [
 <div><?php echo YiluPHP::I()->lang('from_model_result').$test_model; ?></div>
 <div>
     <?php echo YiluPHP::I()->lang('route_rewrite_demo'); ?>
-    <a href="/article/detail/9">/article/detail/9</a>
+    <a href="<?php echo url_pre_lang(); ?>/article/detail/9"><?php echo url_pre_lang(); ?>/article/detail/9</a>
 </div>
 <div>
     <?php echo YiluPHP::I()->lang('parameter_xxx_is_correct', ['field'=>'article_id']); ?>
-    <a href="/?article_id=6">/?article_id=6</a>
+    <a href="<?php echo url_pre_lang(); ?>/?article_id=6"><?php echo url_pre_lang(); ?>/?article_id=6</a>
 </div>
 <div>
     <?php echo YiluPHP::I()->lang('parameter_xxx_error', ['field'=>'article_id']); ?>
-    <a href="/?article_id=77">/?article_id=77</a>
+    <a href="<?php echo url_pre_lang(); ?>/?article_id=77"><?php echo url_pre_lang(); ?>/?article_id=77</a>
 </div>
 <div>
     <?php echo YiluPHP::I()->lang('parameter_xxx_is_correct', ['field'=>'title']); ?>
-    <a href="/?title=aa">/?title=aa</a>
+    <a href="<?php echo url_pre_lang(); ?>/?title=aa"><?php echo url_pre_lang(); ?>/?title=aa</a>
 </div>
 <div>
     <?php echo YiluPHP::I()->lang('parameter_xxx_error', ['field'=>'title']); ?>
-    <a href="/?title=bbbccc">/?title=bbbccc</a>
+    <a href="<?php echo url_pre_lang(); ?>/?title=bbbccc"><?php echo url_pre_lang(); ?>/?title=bbbccc</a>
 </div>
 <div>
     <?php echo YiluPHP::I()->lang('submit_encryption_parameter'); ?> <i>mobile</i>：

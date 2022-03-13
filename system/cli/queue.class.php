@@ -5,8 +5,8 @@
  * 使用redis列表实现
  * Created by PhpStorm.
  * User: WuJianwu
- * Date: 2021.01.01
- * Time: 11:19
+ * Date: 2021/01/21
+ * Time: 18:45
  */
 
 class queue{
