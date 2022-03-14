@@ -790,6 +790,31 @@ class YiluPHP
     }
 
     /**
+     * 获取当前原始的URI，即去掉了语言标识，和针对wampserver的虚拟主机的目录
+     * @return string
+     */
+    public function origin_uri()
+    {
+        if (isset($_SERVER['CONTEXT_PREFIX'])) {
+            //兼容wampserver的虚拟主机模式，型如：http://localhost/test，其中test就是独立的主机名称，即CONTEXT_PREFIX的值
+            $request_uri = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['CONTEXT_PREFIX']));
+        }
+        else {
+            $request_uri = $_SERVER['REQUEST_URI'];
+        }
+
+        //去除url中的语言标识
+        $tmp = explode('/', $request_uri,3);
+        if (!empty($tmp[1]) && in_array(strtolower(trim($tmp[1])), YiluPHP::I()->support_lang())){
+            $request_uri = substr($request_uri, strlen($tmp[1])+1);
+        }
+        if ($request_uri===''){
+            $request_uri = '/';
+        }
+        return $request_uri;
+    }
+
+    /**
      * 查看当前语言所有的翻译
      * @return string
      */
@@ -1083,22 +1108,7 @@ else{
         }
 
         //解析URL路由和参数
-        if (isset($_SERVER['CONTEXT_PREFIX'])) {
-            //兼容wampserver的虚拟主机模式，型如：http://localhost/test，其中test就是独立的主机名称，即CONTEXT_PREFIX的值
-            $request_uri = substr($_SERVER['REQUEST_URI'], strlen($_SERVER['CONTEXT_PREFIX']));
-        }
-        else {
-            $request_uri = $_SERVER['REQUEST_URI'];
-        }
-
-        //去除url中的语言标识
-        $tmp = explode('/', $request_uri,3);
-        if (!empty($tmp[1]) && in_array(strtolower(trim($tmp[1])), YiluPHP::I()->support_lang())){
-            $request_uri = substr($request_uri, strlen($tmp[1])+1);
-        }
-        if ($request_uri===''){
-            $request_uri = '/';
-        }
+        $request_uri = YiluPHP::I()->origin_uri();
 
         $url = explode('?', $request_uri);
         $request_uri = $url[0];
