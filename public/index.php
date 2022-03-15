@@ -1047,6 +1047,7 @@ $uri_lang = YiluPHP::I()->uri_lang();
 //设置需要使用的语言
 if ($uri_lang!==''){
     $config['lang'] = $uri_lang;
+    setcookie('lang', $config['lang'], time()-86400, '/', empty($config['root_domain'])?'':$config['root_domain']);
 }
 else if(isset($_REQUEST['lang']) && trim($_REQUEST['lang'])!='' ){
     $config['lang'] = strtolower(trim($_REQUEST['lang']));
