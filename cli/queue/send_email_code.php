@@ -8,7 +8,7 @@
  * * Date: 2021/01/23
  * Time: 20:45
  */
-class send_email_code{
+class send_email_code extends queue {
 
     /**
      * @name 开始执行队列的函数
@@ -25,8 +25,12 @@ class send_email_code{
     public function run($msg)
     {
         if(empty($msg['to_alias']) || empty($msg['to_email']) || empty($msg['subject']) || empty($msg['html_body'])){
+			$msg = '发邮件验证码失败，参数错误，$msg:'.json_encode($msg);
+			if(PHP_SAPI=='cli'){
+				echo $msg."\r\n";
+			}
             //写文件日志
-            write_applog('ERROR', '发邮件验证码失败，参数错误，$msg:'.json_encode($msg));
+            write_applog('ERROR', $msg);
             return true;
         }
 
@@ -38,7 +42,11 @@ class send_email_code{
             tool_mailer::I()->auto_send();
         }
         catch (Exception $exception){
-            write_applog('ERROR', $exception->getMessage().'，$msg:'.json_encode($msg).', code:'.$exception->getCode());
+			$msg = $exception->getMessage().'，$msg:'.json_encode($msg).', code:'.$exception->getCode();
+			if(PHP_SAPI=='cli'){
+				echo $msg."\r\n";
+			}
+            write_applog('ERROR', msg);
         }
         return true;
     }
