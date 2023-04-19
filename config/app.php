@@ -68,7 +68,8 @@ $config = [
         //default为默认的Redis连接名，你可以自定义其它名称
         'default' => [
             'host'      =>  '127.0.0.1',
-            'port'      =>  '6379',
+            'port'      =>  6379,
+            'default_db'      =>  0,
         ]
     ],
 
