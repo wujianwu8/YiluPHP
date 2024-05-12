@@ -7,8 +7,22 @@
  * Time: 09:22
  */
 
-class pager extends base_class
+class pager
 {
+    //存储单例
+    private static $_instance = null;
+
+    /**
+     * 获取单例
+     * @return model|null 返回单例
+     */
+    public static function I(){
+        if (!static::$_instance){
+            return static::$_instance = new pager();
+        }
+        return static::$_instance;
+    }
+
 	/**
 	 * @name 组装分页码
 	 * @desc 返回组装好的页码数组
