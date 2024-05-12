@@ -145,6 +145,7 @@ class pager
 					//替换之
 					$url = str_replace('{page_size}', $param['page_size'], $url);
 				}
+
 				if($query){
 					$query = explode('&', $query);
 				}
@@ -167,7 +168,7 @@ class pager
 				}
 
 				//在参数中设置每页数量
-				if(!$page_size_in_path && !empty($param[$param['page_size_key']])){
+				if(!$page_size_in_path && !empty($_REQUEST[$param['page_size_key']]) && !empty($param[$param['page_size_key']])){
 					$tmp[] = $param['page_size_key'].'='.$param[$param['page_size_key']];
 				}
 				return $url.($tmp?'?'.implode('&',$tmp):'');
